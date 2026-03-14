@@ -58,14 +58,17 @@ jobs:
           Copy-Item $exe.FullName dist\KursoedovVPN.exe -Force
           Copy-Item xray.exe dist\xray.exe -Force
 
-          @"
-KursoedovVPN (Windows portable)
-1) Запусти KursoedovVPN.exe
-2) Скопируй trojan:// ссылку в буфер
-3) Import from clipboard
-4) Включи System Proxy / подключись
-ALPN: h2,http/1.1
-"@ | Out-File -Encoding utf8 dist\README.txt
+          $readme = @(
+            "KursoedovVPN (Windows portable)",
+            "",
+            "1) Запусти KursoedovVPN.exe",
+            "2) Скопируй trojan:// ссылку в буфер",
+            "3) Import from clipboard",
+            "4) Включи System Proxy / подключись",
+            "",
+            "ALPN: h2,http/1.1"
+          )
+          Set-Content -Path dist\README.txt -Value $readme -Encoding utf8
 
           if (Test-Path KursoedovVPN.zip) { Remove-Item KursoedovVPN.zip -Force }
           Compress-Archive -Path dist\* -DestinationPath KursoedovVPN.zip -Force
