@@ -2,7 +2,7 @@ name: Release KursoedovVPN
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   workflow_dispatch:
 
 permissions:
@@ -22,10 +22,10 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore
-        run: dotnet restore .\\v2rayN.sln
+        run: dotnet restore .\v2rayN.sln
 
       - name: Build (Release)
-        run: dotnet build .\\v2rayN.sln -c Release --no-restore
+        run: dotnet build .\v2rayN.sln -c Release --no-restore
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -41,18 +41,22 @@ jobs:
           go env -w CGO_ENABLED=0
           go env -w GOOS=windows
           go env -w GOARCH=amd64
-          go build -o ..\\xray.exe .\\main
+          go build -o ..\xray.exe .\main
 
       - name: Package KursoedovVPN.zip
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $exe = Get-ChildItem -Recurse -Filter "*.exe" | Where-Object { $_.Name -match "v2rayN|KursoedovVPN" } | Select-Object -First 1
+
+          $exe = Get-ChildItem -Recurse -Filter "*.exe" |
+            Where-Object { $_.Name -match "v2rayN|KursoedovVPN" } |
+            Select-Object -First 1
+
           if (-not $exe) { throw "Cannot find built exe. We'll adjust the path from logs." }
 
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item $exe.FullName dist\\KursoedovVPN.exe -Force
-          Copy-Item xray.exe dist\\xray.exe -Force
+          Copy-Item $exe.FullName dist\KursoedovVPN.exe -Force
+          Copy-Item xray.exe dist\xray.exe -Force
 
           @"
 KursoedovVPN (Windows portable)
@@ -61,9 +65,11 @@ KursoedovVPN (Windows portable)
 3) Import from clipboard
 4) Включи System Proxy / подключись
 ALPN: h2,http/1.1
-"@ | Out-File -Encoding utf8 dist\\README.txt
+"@ | Out-File -Encoding utf8 dist\README.txt
 
-          Compress-Archive -Path dist\\* -DestinationPath KursoedovVPN.zip -Force
+          if (Test-Path KursoedovVPN.zip) { Remove-Item KursoedovVPN.zip -Force }
+          Compress-Archive -Path dist\* -DestinationPath KursoedovVPN.zip -Force
+
           $hash = (Get-FileHash KursoedovVPN.zip -Algorithm SHA256).Hash.ToLower()
           "$hash  KursoedovVPN.zip" | Out-File -Encoding ascii SHA256SUMS.txt
 
