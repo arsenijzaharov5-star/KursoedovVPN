@@ -21,11 +21,23 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      - name: Locate solution
+        id: sln
+        shell: pwsh
+        run: |
+        $sln = Get-ChildItem -Recurse -Filter *.sln | Select-Object -First 1
+        if (-not $sln) { throw "No .sln file found in repository" }
+        "path=$($sln.FullName)" >> $env:GITHUB_OUTPUT
+        Write-Host "Using solution: $($sln.FullName)"
+
       - name: Restore
-        run: dotnet restore .\v2rayN.sln
+        shell: pwsh
+        run: dotnet restore "${{ steps.sln.outputs.path }}"
 
       - name: Build (Release)
-        run: dotnet build .\v2rayN.sln -c Release --no-restore
+        shell: pwsh
+        run: dotnet build "${{ steps.sln.outputs.path }}" -c Release --no-restore
+
 
       - name: Setup Go
         uses: actions/setup-go@v5
