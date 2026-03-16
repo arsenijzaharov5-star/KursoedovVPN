@@ -20,7 +20,10 @@
             <SolidColorBrush x:Key="KursoSurfaceBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="KursoTextBrush" Color="#111111" />
             <SolidColorBrush x:Key="KursoBorderBrush" Color="#D9D9D9" />
+            <SolidColorBrush x:Key="KursoSecondaryTextBrush" Color="#5C5C5C" />
             <SolidColorBrush x:Key="KursoAccentBrush" Color="#1C1C1C" />
+            <SolidColorBrush x:Key="KursoHoverBrush" Color="#2A2A2A" />
+            <SolidColorBrush x:Key="KursoDisabledBrush" Color="#BDBDBD" />
             <system:Double x:Key="MenuItemHeight">32</system:Double>
             <system:Double x:Key="StdFontSize">12</system:Double>
             <system:Double x:Key="StdFontSize1">13</system:Double>
@@ -132,6 +135,16 @@
                 <Setter Property="Foreground" Value="White" />
                 <Setter Property="BorderBrush" Value="{StaticResource KursoAccentBrush}" />
                 <Setter Property="Padding" Value="14,8" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource KursoHoverBrush}" />
+                        <Setter Property="BorderBrush" Value="{StaticResource KursoHoverBrush}" />
+                    </Trigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="{StaticResource KursoDisabledBrush}" />
+                        <Setter Property="BorderBrush" Value="{StaticResource KursoDisabledBrush}" />
+                    </Trigger>
+                </Style.Triggers>
             </Style>
             <Style
                 x:Key="DefContextMenu"
