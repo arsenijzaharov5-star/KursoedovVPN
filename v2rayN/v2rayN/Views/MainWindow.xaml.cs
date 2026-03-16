@@ -409,7 +409,18 @@ public partial class MainWindow
         {
             try
             {
-                await AddServerViaClipboardAsync();
+                var text = WindowsUtils.GetClipboardData();
+                if (text.IsNullOrEmpty())
+                {
+                    MessageBox.Show("Буфер обмена пуст. Скопируй ключ и попробуй снова.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                if (ViewModel != null)
+                {
+                    await ViewModel.AddServerViaClipboardAsync(text);
+                    MessageBox.Show("Ключ обработан. Если формат корректный, профиль добавлен.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
@@ -418,11 +429,21 @@ public partial class MainWindow
         };
 
         var manualTrojan = new MenuItem() { Header = "Ввести ключ вручную" };
-        manualTrojan.Click += (_, _) =>
+        manualTrojan.Click += async (_, _) =>
         {
             try
             {
-                _ = ViewModel?.AddTrojanServerCmd.Execute();
+                var input = PromptForKey();
+                if (input.IsNullOrEmpty())
+                {
+                    return;
+                }
+
+                if (ViewModel != null)
+                {
+                    await ViewModel.AddServerViaClipboardAsync(input);
+                    MessageBox.Show("Ключ обработан. Если формат корректный, профиль добавлен.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
@@ -434,6 +455,42 @@ public partial class MainWindow
         cm.Items.Add(manualTrojan);
         cm.PlacementTarget = btnAddKey;
         cm.IsOpen = true;
+    }
+
+    private string PromptForKey()
+    {
+        var dialog = new Window
+        {
+            Title = "Ввести ключ",
+            Width = 560,
+            Height = 190,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Owner = this,
+            ResizeMode = ResizeMode.NoResize,
+            Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F6F6F6"))
+        };
+
+        var panel = new StackPanel { Margin = new Thickness(14) };
+        panel.Children.Add(new TextBlock { Text = "Вставь trojan:// или другую ссылку:", Margin = new Thickness(0, 0, 0, 8) });
+
+        var tb = new TextBox { Height = 30 };
+        panel.Children.Add(tb);
+
+        var btn = new Button
+        {
+            Content = "Добавить",
+            Margin = new Thickness(0, 12, 0, 0),
+            Width = 120,
+            Height = 34,
+            HorizontalAlignment = HorizontalAlignment.Right
+        };
+
+        btn.Click += (_, _) => dialog.DialogResult = true;
+        panel.Children.Add(btn);
+
+        dialog.Content = panel;
+        var ok = dialog.ShowDialog() == true;
+        return ok ? tb.Text.Trim() : string.Empty;
     }
 
     private void BtnConnectMain_Click(object sender, RoutedEventArgs e)
