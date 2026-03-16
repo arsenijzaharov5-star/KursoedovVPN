@@ -388,7 +388,7 @@ public partial class MainWindow
 
     private void BtnNavSettings_Click(object sender, RoutedEventArgs e)
     {
-        TriggerMenuClick(menuOptionSetting);
+        _ = new OptionSettingWindow().ShowDialog();
     }
 
     private void BtnNavLogs_Click(object sender, RoutedEventArgs e)
@@ -398,7 +398,11 @@ public partial class MainWindow
 
     private void BtnNavAbout_Click(object sender, RoutedEventArgs e)
     {
-        TriggerMenuClick(menuCheckUpdate);
+        MessageBox.Show(
+            "kursoedovVPN\n\nКлиент для пользователей @kursoedovvpn_bot",
+            "О программе",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private void BtnAddKey_Click(object sender, RoutedEventArgs e)
