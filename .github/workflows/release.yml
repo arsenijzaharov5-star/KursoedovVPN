@@ -93,7 +93,7 @@ jobs:
 
           $iss = @(
             '[Setup]',
-            'AppId={2A8FAF48-6AA4-4E73-9A58-0DFDF76C0A31}',
+            'AppId={{2A8FAF48-6AA4-4E73-9A58-0DFDF76C0A31}}',
             'AppName=kursoedovVPN',
             'AppVersion=0.1.${{ github.run_number }}',
             'DefaultDirName={autopf}\kursoedovVPN',
