@@ -20,6 +20,6 @@ public class MaterialDesignFonts
         catch
         {
         }
-        MyFont ??= new FontFamily("Microsoft YaHei");
+        MyFont ??= new FontFamily("Segoe UI");
     }
 }

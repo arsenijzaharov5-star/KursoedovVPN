@@ -10,7 +10,7 @@
     xmlns:resx="clr-namespace:ServiceLib.Resx;assembly=ServiceLib"
     xmlns:view="clr-namespace:v2rayN.Views"
     xmlns:vms="clr-namespace:ServiceLib.ViewModels;assembly=ServiceLib"
-    Title="v2rayN"
+    Title="kursoedovVPN"
     Width="1200"
     Height="800"
     MinWidth="800"
@@ -71,28 +71,28 @@
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddServerViaImage}" />
                                 <MenuItem
-                                    x:Name="menuAddCustomServer"
+                                    x:Name="menuAddCustomServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddCustomServer}" />
                                 <MenuItem
-                                    x:Name="menuAddPolicyGroupServer"
+                                    x:Name="menuAddPolicyGroupServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddPolicyGroupServer}" />
                                 <MenuItem
-                                    x:Name="menuAddProxyChainServer"
+                                    x:Name="menuAddProxyChainServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddProxyChainServer}" />
                                 <Separator Margin="-40,5" />
                                 <MenuItem
-                                    x:Name="menuAddVmessServer"
+                                    x:Name="menuAddVmessServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddVmessServer}" />
                                 <MenuItem
-                                    x:Name="menuAddVlessServer"
+                                    x:Name="menuAddVlessServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddVlessServer}" />
                                 <MenuItem
-                                    x:Name="menuAddShadowsocksServer"
+                                    x:Name="menuAddShadowsocksServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddShadowsocksServer}" />
                                 <MenuItem
@@ -104,24 +104,24 @@
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddHysteria2Server}" />
                                 <MenuItem
-                                    x:Name="menuAddWireguardServer"
+                                    x:Name="menuAddWireguardServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddWireguardServer}" />
                                 <MenuItem
-                                    x:Name="menuAddSocksServer"
+                                    x:Name="menuAddSocksServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddSocksServer}" />
                                 <MenuItem
-                                    x:Name="menuAddHttpServer"
+                                    x:Name="menuAddHttpServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddHttpServer}" />
                                 <Separator Margin="-40,5" />
                                 <MenuItem
-                                    x:Name="menuAddTuicServer"
+                                    x:Name="menuAddTuicServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddTuicServer}" />
                                 <MenuItem
-                                    x:Name="menuAddAnytlsServer"
+                                    x:Name="menuAddAnytlsServer" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddAnytlsServer}" />
                             </MenuItem>
@@ -148,15 +148,15 @@
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuSubUpdate}" />
                                 <MenuItem
-                                    x:Name="menuSubUpdateViaProxy"
+                                    x:Name="menuSubUpdateViaProxy" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuSubUpdateViaProxy}" />
                                 <MenuItem
-                                    x:Name="menuSubGroupUpdate"
+                                    x:Name="menuSubGroupUpdate" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuSubGroupUpdate}" />
                                 <MenuItem
-                                    x:Name="menuSubGroupUpdateViaProxy"
+                                    x:Name="menuSubGroupUpdateViaProxy" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuSubGroupUpdateViaProxy}" />
                             </MenuItem>
@@ -178,32 +178,32 @@
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuOptionSetting}" />
                                 <MenuItem
-                                    x:Name="menuRoutingSetting"
+                                    x:Name="menuRoutingSetting" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuRoutingSetting}" />
                                 <MenuItem
-                                    x:Name="menuDNSSetting"
+                                    x:Name="menuDNSSetting" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuDNSSetting}" />
                                 <MenuItem
-                                    x:Name="menuFullConfigTemplate"
+                                    x:Name="menuFullConfigTemplate" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuFullConfigTemplate}" />
                                 <MenuItem
-                                    x:Name="menuGlobalHotkeySetting"
+                                    x:Name="menuGlobalHotkeySetting" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuGlobalHotkeySetting}" />
                                 <Separator Margin="-40,5" />
                                 <MenuItem
-                                    x:Name="menuRebootAsAdmin"
+                                    x:Name="menuRebootAsAdmin" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuRebootAsAdmin}" />
                                 <MenuItem
-                                    x:Name="menuSettingsSetUWP"
+                                    x:Name="menuSettingsSetUWP" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.TbSettingsSetUWP}" />
                                 <MenuItem
-                                    x:Name="menuClearServerStatistics"
+                                    x:Name="menuClearServerStatistics" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuClearServerStatistics}" />
                                 <Separator Margin="-40,5" />
@@ -222,11 +222,11 @@
                                         Header="{x:Static resx:ResUI.menuRegionalPresetsIran}" />
                                 </MenuItem>
                                 <MenuItem
-                                    x:Name="menuBackupAndRestore"
+                                    x:Name="menuBackupAndRestore" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuBackupAndRestore}" />
                                 <MenuItem
-                                    x:Name="menuOpenTheFileLocation"
+                                    x:Name="menuOpenTheFileLocation" Visibility="Collapsed"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuOpenTheFileLocation}" />
                             </MenuItem>
@@ -253,7 +253,7 @@
                         <Separator />
                         <Menu Margin="0,1" Style="{StaticResource ToolbarMenu}">
                             <MenuItem
-                                x:Name="menuReload"
+                                x:Name="menuReload" Visibility="Collapsed"
                                 Padding="{StaticResource MarginLeftRight8}"
                                 AutomationProperties.Name="{x:Static resx:ResUI.menuReload}">
                                 <MenuItem.Header>
@@ -270,7 +270,7 @@
                         <Separator />
                         <Menu Margin="0,1" Style="{StaticResource ToolbarMenu}">
                             <MenuItem
-                                x:Name="menuPromotion"
+                                x:Name="menuPromotion" Visibility="Collapsed"
                                 Padding="{StaticResource MarginLeftRight8}"
                                 AutomationProperties.Name="{x:Static resx:ResUI.menuPromotion}">
                                 <MenuItem.Header>
@@ -328,8 +328,8 @@
                             Grid.Column="2"
                             HorizontalContentAlignment="Left">
                             <TabItem x:Name="tabMsgView" Header="{x:Static resx:ResUI.MsgInformationTitle}" />
-                            <TabItem x:Name="tabClashProxies" Header="{x:Static resx:ResUI.TbProxies}" />
-                            <TabItem x:Name="tabClashConnections" Header="{x:Static resx:ResUI.TbConnections}" />
+                            <TabItem x:Name="tabClashProxies" Visibility="Collapsed" Header="{x:Static resx:ResUI.TbProxies}" />
+                            <TabItem x:Name="tabClashConnections" Visibility="Collapsed" Header="{x:Static resx:ResUI.TbConnections}" />
                         </TabControl>
                     </Grid>
                     <Grid x:Name="gridMain1" Visibility="Collapsed">
@@ -357,7 +357,7 @@
                                     </StackPanel>
                                 </TabItem.Header>
                             </TabItem>
-                            <TabItem x:Name="tabClashProxies1">
+                            <TabItem x:Name="tabClashProxies1" Visibility="Collapsed">
                                 <TabItem.Header>
                                     <StackPanel>
                                         <materialDesign:PackIcon HorizontalAlignment="Center" Kind="ArrowDecisionOutline" />
@@ -368,7 +368,7 @@
                                     </StackPanel>
                                 </TabItem.Header>
                             </TabItem>
-                            <TabItem x:Name="tabClashConnections1">
+                            <TabItem x:Name="tabClashConnections1" Visibility="Collapsed">
                                 <TabItem.Header>
                                     <StackPanel>
                                         <materialDesign:PackIcon HorizontalAlignment="Center" Kind="LanConnect" />
@@ -409,7 +409,7 @@
                                     </StackPanel>
                                 </TabItem.Header>
                             </TabItem>
-                            <TabItem x:Name="tabClashProxies2">
+                            <TabItem x:Name="tabClashProxies2" Visibility="Collapsed">
                                 <TabItem.Header>
                                     <StackPanel>
                                         <materialDesign:PackIcon HorizontalAlignment="Center" Kind="ArrowDecisionOutline" />
@@ -420,7 +420,7 @@
                                     </StackPanel>
                                 </TabItem.Header>
                             </TabItem>
-                            <TabItem x:Name="tabClashConnections2">
+                            <TabItem x:Name="tabClashConnections2" Visibility="Collapsed">
                                 <TabItem.Header>
                                     <StackPanel>
                                         <materialDesign:PackIcon HorizontalAlignment="Center" Kind="LanConnect" />

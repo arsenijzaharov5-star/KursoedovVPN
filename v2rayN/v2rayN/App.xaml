@@ -11,10 +11,16 @@
             <ResourceDictionary.MergedDictionaries>
                 <materialDesign:BundledTheme
                     BaseTheme="Light"
-                    PrimaryColor="Blue"
-                    SecondaryColor="Lime" />
+                    PrimaryColor="Grey"
+                    SecondaryColor="BlueGrey" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="KursoBackgroundBrush" Color="#F6F6F6" />
+            <SolidColorBrush x:Key="KursoSurfaceBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="KursoTextBrush" Color="#111111" />
+            <SolidColorBrush x:Key="KursoBorderBrush" Color="#D9D9D9" />
+            <SolidColorBrush x:Key="KursoAccentBrush" Color="#1C1C1C" />
             <system:Double x:Key="MenuItemHeight">32</system:Double>
             <system:Double x:Key="StdFontSize">12</system:Double>
             <system:Double x:Key="StdFontSize1">13</system:Double>
@@ -114,12 +120,18 @@
                 BasedOn="{StaticResource MaterialDesignUserForegroundCheckBox}"
                 TargetType="{x:Type CheckBox}">
                 <Setter Property="FontSize" Value="{DynamicResource StdFontSize}" />
+                <Setter Property="Background" Value="{StaticResource KursoBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource KursoBorderBrush}" />
             </Style>
             <Style
                 x:Key="DefButton"
                 BasedOn="{StaticResource MaterialDesignRaisedButton}"
                 TargetType="{x:Type ButtonBase}">
                 <Setter Property="FontSize" Value="{DynamicResource StdFontSize}" />
+                <Setter Property="Background" Value="{StaticResource KursoAccentBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderBrush" Value="{StaticResource KursoAccentBrush}" />
+                <Setter Property="Padding" Value="14,8" />
             </Style>
             <Style
                 x:Key="DefContextMenu"
@@ -143,12 +155,15 @@
                 TargetType="{x:Type ComboBox}">
                 <Setter Property="FontSize" Value="{DynamicResource StdFontSize}" />
                 <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="Background" Value="{StaticResource KursoSurfaceBrush}" />
             </Style>
             <Style
                 x:Key="DefDataGrid"
                 BasedOn="{StaticResource MaterialDesignDataGrid}"
                 TargetType="{x:Type DataGrid}">
                 <Setter Property="FontSize" Value="{DynamicResource StdFontSize}" />
+                <Setter Property="Background" Value="{StaticResource KursoSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource KursoBorderBrush}" />
             </Style>
             <Style
                 x:Key="DefTextBox"
@@ -211,8 +226,8 @@
                 <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
                 <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
                 <Setter Property="TextOptions.TextHintingMode" Value="Fixed" />
-                <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" />
-                <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
+                <Setter Property="TextElement.Foreground" Value="{StaticResource KursoTextBrush}" />
+                <Setter Property="Background" Value="{StaticResource KursoBackgroundBrush}" />
                 <Setter Property="TextElement.FontFamily" Value="{x:Static conv:MaterialDesignFonts.MyFont}" />
                 <Setter Property="FontFamily" Value="{x:Static conv:MaterialDesignFonts.MyFont}" />
                 <Setter Property="ResizeMode" Value="CanResize" />
@@ -224,8 +239,8 @@
                 <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
                 <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
                 <Setter Property="TextOptions.TextHintingMode" Value="Fixed" />
-                <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" />
-                <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
+                <Setter Property="TextElement.Foreground" Value="{StaticResource KursoTextBrush}" />
+                <Setter Property="Background" Value="{StaticResource KursoBackgroundBrush}" />
                 <Setter Property="TextElement.FontFamily" Value="{x:Static conv:MaterialDesignFonts.MyFont}" />
                 <Setter Property="FontFamily" Value="{x:Static conv:MaterialDesignFonts.MyFont}" />
             </Style>
