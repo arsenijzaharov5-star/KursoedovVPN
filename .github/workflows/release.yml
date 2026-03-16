@@ -31,6 +31,11 @@ jobs:
         shell: pwsh
         run: dotnet build "v2rayN/v2rayN.sln" -c Release --no-restore
 
+      - name: Publish self-contained (win-x64)
+        shell: pwsh
+        run: |
+          dotnet publish "v2rayN/v2rayN/v2rayN.csproj" -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o "v2rayN/v2rayN/publish-win-x64"
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -52,12 +57,9 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
 
-          # Pick the desktop app output exe (avoid grabbing tools/installers)
-          $appExe = Get-ChildItem -Recurse -File -Filter "v2rayN.exe" |
-            Where-Object { $_.FullName -match "v2rayN\\v2rayN\\bin\\Release" } |
-            Select-Object -First 1
-
-          if (-not $appExe) { throw "Cannot find app exe in v2rayN/v2rayN/bin/Release" }
+          # Use self-contained publish output
+          $appExe = Get-Item "v2rayN/v2rayN/publish-win-x64/v2rayN.exe" -ErrorAction SilentlyContinue
+          if (-not $appExe) { throw "Cannot find app exe in v2rayN/v2rayN/publish-win-x64" }
           if (-not (Test-Path "xray.exe")) { throw "xray.exe not found in workspace root." }
 
           $appDir = Split-Path $appExe.FullName -Parent
