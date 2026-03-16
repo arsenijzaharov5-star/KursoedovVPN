@@ -370,6 +370,57 @@ public partial class MainWindow
         DialogHost.Show(_backupAndRestoreView, "RootDialog");
     }
 
+
+    private static void TriggerMenuClick(MenuItem menu)
+    {
+        menu.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+    }
+
+    private void BtnNavHome_Click(object sender, RoutedEventArgs e)
+    {
+        // Keep user on simplified home screen
+    }
+
+    private void BtnNavProfiles_Click(object sender, RoutedEventArgs e)
+    {
+        TriggerMenuClick(menuSubSetting);
+    }
+
+    private void BtnNavSettings_Click(object sender, RoutedEventArgs e)
+    {
+        TriggerMenuClick(menuOptionSetting);
+    }
+
+    private void BtnNavLogs_Click(object sender, RoutedEventArgs e)
+    {
+        TriggerMenuClick(menuOpenTheFileLocation);
+    }
+
+    private void BtnNavAbout_Click(object sender, RoutedEventArgs e)
+    {
+        TriggerMenuClick(menuCheckUpdate);
+    }
+
+    private void BtnAddKey_Click(object sender, RoutedEventArgs e)
+    {
+        var cm = new ContextMenu();
+        var fromClipboard = new MenuItem() { Header = "Вставить ссылку из буфера" };
+        fromClipboard.Click += (_, _) => TriggerMenuClick(menuAddServerViaClipboard);
+
+        var manualTrojan = new MenuItem() { Header = "Ввести ключ вручную" };
+        manualTrojan.Click += (_, _) => TriggerMenuClick(menuAddTrojanServer);
+
+        cm.Items.Add(fromClipboard);
+        cm.Items.Add(manualTrojan);
+        cm.PlacementTarget = btnAddKey;
+        cm.IsOpen = true;
+    }
+
+    private void BtnConnectMain_Click(object sender, RoutedEventArgs e)
+    {
+        // Quick action: apply system proxy mode (closest to "connect" UX in v2rayN)
+        AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
+    }
     #endregion Event
 
     #region UI
