@@ -52,7 +52,7 @@ jobs:
           go env -w GOARCH=amd64
           go build -o ..\xray.exe .\main
 
-      - name: Package KursoedovVPN.zip
+      - name: Package app folder + portable zip
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -74,12 +74,10 @@ jobs:
           Copy-Item xray.exe dist\xray.exe -Force
 
           $readme = @(
-            "KursoedovVPN (Windows portable)",
-            "1) Распакуй архив в отдельную папку",
-            "2) Запусти KursoedovVPN.exe",
-            "3) Скопируй trojan:// ссылку в буфер",
-            "4) Import from clipboard",
-            "5) Включи System Proxy / подключись",
+            "KursoedovVPN (Windows)",
+            "Запуск через installer: KursoedovVPN-Setup.exe",
+            "Портативный запуск: KursoedovVPN.exe",
+            "Импорт ключа: Import from clipboard",
             "ALPN: h2,http/1.1"
           )
           Set-Content -Path dist\README.txt -Value $readme -Encoding utf8
@@ -87,8 +85,50 @@ jobs:
           if (Test-Path KursoedovVPN.zip) { Remove-Item KursoedovVPN.zip -Force }
           Compress-Archive -Path dist\* -DestinationPath KursoedovVPN.zip -Force
 
-          $hash = (Get-FileHash KursoedovVPN.zip -Algorithm SHA256).Hash.ToLower()
-          "$hash  KursoedovVPN.zip" | Out-File -Encoding ascii SHA256SUMS.txt
+      - name: Build installer (Inno Setup)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          choco install innosetup -y --no-progress
+
+          $iss = @(
+            "[Setup]",
+            "AppId={2A8FAF48-6AA4-4E73-9A58-0DFDF76C0A31}",
+            "AppName=kursoedovVPN",
+            "AppVersion=0.1.${{ github.run_number }}",
+            "DefaultDirName={autopf}\\kursoedovVPN",
+            "DefaultGroupName=kursoedovVPN",
+            "OutputDir=.",
+            "OutputBaseFilename=KursoedovVPN-Setup",
+            "Compression=lzma",
+            "SolidCompression=yes",
+            "WizardStyle=modern",
+            "ArchitecturesInstallIn64BitMode=x64compatible",
+            "",
+            "[Files]",
+            "Source: \"dist\\*\"; DestDir: \"{app}\"; Flags: recursesubdirs ignoreversion",
+            "",
+            "[Icons]",
+            "Name: \"{group}\\kursoedovVPN\"; Filename: \"{app}\\KursoedovVPN.exe\"",
+            "Name: \"{autodesktop}\\kursoedovVPN\"; Filename: \"{app}\\KursoedovVPN.exe\"",
+            "",
+            "[Run]",
+            "Filename: \"{app}\\KursoedovVPN.exe\"; Description: \"Запустить kursoedovVPN\"; Flags: nowait postinstall skipifsilent"
+          )
+          Set-Content -Path installer.iss -Value $iss -Encoding utf8
+
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: SHA256 sums
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zipHash = (Get-FileHash KursoedovVPN.zip -Algorithm SHA256).Hash.ToLower()
+          $setupHash = (Get-FileHash KursoedovVPN-Setup.exe -Algorithm SHA256).Hash.ToLower()
+          @(
+            "$zipHash  KursoedovVPN.zip",
+            "$setupHash  KursoedovVPN-Setup.exe"
+          ) | Out-File -Encoding ascii SHA256SUMS.txt
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -97,4 +137,5 @@ jobs:
           name: "KursoedovVPN v0.1.${{ github.run_number }}"
           files: |
             KursoedovVPN.zip
+            KursoedovVPN-Setup.exe
             SHA256SUMS.txt
