@@ -413,7 +413,7 @@ public partial class MainWindow
             }
             catch (Exception ex)
             {
-                UI.ShowError(ex.Message);
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         };
 
@@ -426,7 +426,7 @@ public partial class MainWindow
             }
             catch (Exception ex)
             {
-                UI.ShowError(ex.Message);
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         };
 
