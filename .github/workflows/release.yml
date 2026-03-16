@@ -52,23 +52,32 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
 
-          $exe = Get-ChildItem -Recurse -Filter "*.exe" |
-            Where-Object { $_.Name -match "v2rayN|KursoedovVPN" } |
+          # Pick the desktop app output exe (avoid grabbing tools/installers)
+          $appExe = Get-ChildItem -Recurse -File -Filter "v2rayN.exe" |
+            Where-Object { $_.FullName -match "v2rayN\\v2rayN\\bin\\Release" } |
             Select-Object -First 1
 
-          if (-not $exe) { throw "Cannot find built exe. Check build output paths." }
+          if (-not $appExe) { throw "Cannot find app exe in v2rayN/v2rayN/bin/Release" }
           if (-not (Test-Path "xray.exe")) { throw "xray.exe not found in workspace root." }
 
+          $appDir = Split-Path $appExe.FullName -Parent
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item $exe.FullName dist\KursoedovVPN.exe -Force
+
+          # Copy full app runtime folder (dll/json/deps + exe), then rename exe for branding
+          Copy-Item "$appDir\*" dist\ -Recurse -Force
+          if (-not (Test-Path "dist\v2rayN.exe")) { throw "dist\\v2rayN.exe missing after copy" }
+          Move-Item dist\v2rayN.exe dist\KursoedovVPN.exe -Force
+
+          # Ensure our xray core is present
           Copy-Item xray.exe dist\xray.exe -Force
 
           $readme = @(
             "KursoedovVPN (Windows portable)",
-            "1) Запусти KursoedovVPN.exe",
-            "2) Скопируй trojan:// ссылку в буфер",
-            "3) Import from clipboard",
-            "4) Включи System Proxy / подключись",
+            "1) Распакуй архив в отдельную папку",
+            "2) Запусти KursoedovVPN.exe",
+            "3) Скопируй trojan:// ссылку в буфер",
+            "4) Import from clipboard",
+            "5) Включи System Proxy / подключись",
             "ALPN: h2,http/1.1"
           )
           Set-Content -Path dist\README.txt -Value $readme -Encoding utf8
