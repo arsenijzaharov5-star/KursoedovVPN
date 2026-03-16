@@ -38,7 +38,7 @@
         Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
         <Grid>
             <DockPanel>
-                <ToolBarTray DockPanel.Dock="Top">
+                <ToolBarTray DockPanel.Dock="Top" Visibility="Collapsed">
                     <ToolBar
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
@@ -312,128 +312,88 @@
                     </ToolBar>
                 </ToolBarTray>
 
-                <view:StatusBarView DockPanel.Dock="Bottom" />
+                <view:StatusBarView DockPanel.Dock="Bottom" Visibility="Collapsed" />
 
                 <Grid>
-                    <Grid x:Name="gridMain" Visibility="Collapsed">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="10" />
-                            <ColumnDefinition Width="1*" />
-                        </Grid.ColumnDefinitions>
-                        <ContentControl x:Name="tabProfiles" Grid.Column="0" />
-                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
-                        <TabControl
-                            x:Name="tabMain"
-                            Grid.Column="2"
-                            HorizontalContentAlignment="Left">
-                            <TabItem x:Name="tabMsgView" Header="{x:Static resx:ResUI.MsgInformationTitle}" />
-                            <TabItem x:Name="tabClashProxies" Visibility="Collapsed" Header="{x:Static resx:ResUI.TbProxies}" />
-                            <TabItem x:Name="tabClashConnections" Visibility="Collapsed" Header="{x:Static resx:ResUI.TbConnections}" />
-                        </TabControl>
-                    </Grid>
-                    <Grid x:Name="gridMain1" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#D9D9D9" BorderThickness="0,0,1,0">
+                        <StackPanel Margin="18,20,18,20">
+                            <TextBlock Text="kursoedovVPN" FontSize="22" FontWeight="SemiBold" Foreground="#111111" Margin="0,0,0,26" />
+                            <Button Style="{StaticResource DefButton}" Content="Главная" Margin="0,0,0,10" />
+                            <Button Style="{StaticResource DefButton}" Content="Профили" Margin="0,0,0,10" />
+                            <Button Style="{StaticResource DefButton}" Content="Настройки" Margin="0,0,0,10" />
+                            <Button Style="{StaticResource DefButton}" Content="Логи" Margin="0,0,0,10" />
+                            <Button Style="{StaticResource DefButton}" Content="О программе" Margin="0,0,0,10" />
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Grid.Column="1" Margin="20,16,20,16">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="1*" />
-                            <RowDefinition Height="10" />
-                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <ContentControl x:Name="tabProfiles1" Grid.Row="0" />
-                        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" />
-                        <TabControl
-                            x:Name="tabMain1"
-                            Grid.Row="2"
-                            materialDesign:NavigationRailAssist.ShowSelectionBackground="True"
-                            Style="{StaticResource MaterialDesignNavigationRailTabControl}"
-                            TabStripPlacement="Left">
-                            <TabItem x:Name="tabMsgView1">
-                                <TabItem.Header>
-                                    <StackPanel>
-                                        <materialDesign:PackIcon HorizontalAlignment="Center" Kind="MessageTextOutline" />
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            Style="{StaticResource ToolbarTextBlock}"
-                                            Text="{x:Static resx:ResUI.MsgInformationTitle}" />
-                                    </StackPanel>
-                                </TabItem.Header>
-                            </TabItem>
-                            <TabItem x:Name="tabClashProxies1" Visibility="Collapsed">
-                                <TabItem.Header>
-                                    <StackPanel>
-                                        <materialDesign:PackIcon HorizontalAlignment="Center" Kind="ArrowDecisionOutline" />
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            Style="{StaticResource ToolbarTextBlock}"
-                                            Text="{x:Static resx:ResUI.TbProxies}" />
-                                    </StackPanel>
-                                </TabItem.Header>
-                            </TabItem>
-                            <TabItem x:Name="tabClashConnections1" Visibility="Collapsed">
-                                <TabItem.Header>
-                                    <StackPanel>
-                                        <materialDesign:PackIcon HorizontalAlignment="Center" Kind="LanConnect" />
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            Style="{StaticResource ToolbarTextBlock}"
-                                            Text="{x:Static resx:ResUI.TbConnections}" />
-                                    </StackPanel>
-                                </TabItem.Header>
-                            </TabItem>
-                        </TabControl>
+
+                        <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#D9D9D9" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,14">
+                            <DockPanel>
+                                <TextBlock Text="Профиль" Foreground="#5C5C5C" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <ComboBox x:Name="uiProfileCombo" Width="340" Style="{StaticResource DefComboBox}" />
+                            </DockPanel>
+                        </Border>
+
+                        <Border Grid.Row="1" Background="#FFFFFF" BorderBrush="#D9D9D9" BorderThickness="1" CornerRadius="12" Padding="20" Margin="0,0,0,14">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="Время подключения" FontSize="16" Foreground="#5C5C5C" HorizontalAlignment="Center" />
+                                <TextBlock Text="00:00:00" FontSize="42" FontWeight="SemiBold" Foreground="#111111" HorizontalAlignment="Center" Margin="0,8,0,16" />
+                                <Button Style="{StaticResource DefButton}" Content="Подключиться" Padding="30,12" HorizontalAlignment="Center" />
+                                <TextBlock Text="Не подключено" Foreground="#5C5C5C" HorizontalAlignment="Center" Margin="0,12,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Grid Grid.Row="2">
+                            <Grid x:Name="gridMain" Visibility="Collapsed">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+                                <ContentControl x:Name="tabProfiles" Grid.Column="0" />
+                                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
+                                <TabControl x:Name="tabMain" Grid.Column="2" HorizontalContentAlignment="Left">
+                                    <TabItem x:Name="tabMsgView" Header="{x:Static resx:ResUI.MsgInformationTitle}" />
+                                    <TabItem x:Name="tabClashProxies" Visibility="Collapsed" Header="{x:Static resx:ResUI.TbProxies}" />
+                                    <TabItem x:Name="tabClashConnections" Visibility="Collapsed" Header="{x:Static resx:ResUI.TbConnections}" />
+                                </TabControl>
+                            </Grid>
+                            <Grid x:Name="gridMain1" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="10" />
+                                    <RowDefinition Height="1*" />
+                                </Grid.RowDefinitions>
+                                <ContentControl x:Name="tabProfiles1" Grid.Row="0" />
+                                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" />
+                                <TabControl x:Name="tabMain1" Grid.Row="2" materialDesign:NavigationRailAssist.ShowSelectionBackground="True" Style="{StaticResource MaterialDesignNavigationRailTabControl}" TabStripPlacement="Left">
+                                    <TabItem x:Name="tabMsgView1" />
+                                    <TabItem x:Name="tabClashProxies1" Visibility="Collapsed" />
+                                    <TabItem x:Name="tabClashConnections1" Visibility="Collapsed" />
+                                </TabControl>
+                            </Grid>
+                            <Grid x:Name="gridMain2" Visibility="Collapsed">
+                                <TabControl x:Name="tabMain2" materialDesign:NavigationRailAssist.ShowSelectionBackground="True" Style="{StaticResource MaterialDesignNavigationRailTabControl}" TabStripPlacement="Left">
+                                    <TabItem x:Name="tabProfiles2" />
+                                    <TabItem x:Name="tabMsgView2" />
+                                    <TabItem x:Name="tabClashProxies2" Visibility="Collapsed" />
+                                    <TabItem x:Name="tabClashConnections2" Visibility="Collapsed" />
+                                </TabControl>
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid x:Name="gridMain2" Visibility="Collapsed">
-                        <TabControl
-                            x:Name="tabMain2"
-                            materialDesign:NavigationRailAssist.ShowSelectionBackground="True"
-                            Style="{StaticResource MaterialDesignNavigationRailTabControl}"
-                            TabStripPlacement="Left">
-                            <TabItem x:Name="tabProfiles2">
-                                <TabItem.Header>
-                                    <StackPanel>
-                                        <materialDesign:PackIcon HorizontalAlignment="Center" Kind="Server" />
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            Style="{StaticResource ToolbarTextBlock}"
-                                            Text="{x:Static resx:ResUI.menuServers}" />
-                                    </StackPanel>
-                                </TabItem.Header>
-                            </TabItem>
-                            <TabItem x:Name="tabMsgView2">
-                                <TabItem.Header>
-                                    <StackPanel>
-                                        <materialDesign:PackIcon HorizontalAlignment="Center" Kind="MessageTextOutline" />
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            Style="{StaticResource ToolbarTextBlock}"
-                                            Text="{x:Static resx:ResUI.MsgInformationTitle}" />
-                                    </StackPanel>
-                                </TabItem.Header>
-                            </TabItem>
-                            <TabItem x:Name="tabClashProxies2" Visibility="Collapsed">
-                                <TabItem.Header>
-                                    <StackPanel>
-                                        <materialDesign:PackIcon HorizontalAlignment="Center" Kind="ArrowDecisionOutline" />
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            Style="{StaticResource ToolbarTextBlock}"
-                                            Text="{x:Static resx:ResUI.TbProxies}" />
-                                    </StackPanel>
-                                </TabItem.Header>
-                            </TabItem>
-                            <TabItem x:Name="tabClashConnections2" Visibility="Collapsed">
-                                <TabItem.Header>
-                                    <StackPanel>
-                                        <materialDesign:PackIcon HorizontalAlignment="Center" Kind="LanConnect" />
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            Style="{StaticResource ToolbarTextBlock}"
-                                            Text="{x:Static resx:ResUI.TbConnections}" />
-                                    </StackPanel>
-                                </TabItem.Header>
-                            </TabItem>
-                        </TabControl>
-                    </Grid>
-                    <materialDesign:Snackbar x:Name="MainSnackbar" MessageQueue="{materialDesign:MessageQueue}" />
+                    <materialDesign:Snackbar x:Name="MainSnackbar" MessageQueue="{materialDesign:MessageQueue}" Grid.ColumnSpan="2" />
                 </Grid>
             </DockPanel>
         </Grid>
