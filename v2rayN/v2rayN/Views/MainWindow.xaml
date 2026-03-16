@@ -325,7 +325,7 @@
                             <TextBlock Text="kursoedovVPN" FontSize="22" FontWeight="SemiBold" Foreground="#111111" Margin="0,0,0,26" />
                             <Button x:Name="btnNavHome" Style="{StaticResource DefButton}" Content="Главная" Margin="0,0,0,10" Click="BtnNavHome_Click" />
                                                         <Button x:Name="btnNavSettings" Style="{StaticResource DefButton}" Content="Настройки" Margin="0,0,0,10" Click="BtnNavSettings_Click" />
-                                                        <Button x:Name="btnNavAbout" Style="{StaticResource DefButton}" Content="О программе" Margin="0,0,0,10" Click="BtnNavAbout_Click" />
+                                                        <Border Height="0" />
                         </StackPanel>
                     </Border>
 

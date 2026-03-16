@@ -398,21 +398,37 @@ public partial class MainWindow
 
     private void BtnNavAbout_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show(
-            "kursoedovVPN\n\nКлиент для пользователей @kursoedovvpn_bot",
-            "О программе",
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
     }
 
     private void BtnAddKey_Click(object sender, RoutedEventArgs e)
     {
         var cm = new ContextMenu();
+
         var fromClipboard = new MenuItem() { Header = "Вставить ссылку из буфера" };
-        fromClipboard.Click += (_, _) => TriggerMenuClick(menuAddServerViaClipboard);
+        fromClipboard.Click += async (_, _) =>
+        {
+            try
+            {
+                await AddServerViaClipboardAsync();
+            }
+            catch (Exception ex)
+            {
+                UI.ShowError(ex.Message);
+            }
+        };
 
         var manualTrojan = new MenuItem() { Header = "Ввести ключ вручную" };
-        manualTrojan.Click += (_, _) => TriggerMenuClick(menuAddTrojanServer);
+        manualTrojan.Click += (_, _) =>
+        {
+            try
+            {
+                _ = ViewModel?.AddTrojanServerCmd.Execute();
+            }
+            catch (Exception ex)
+            {
+                UI.ShowError(ex.Message);
+            }
+        };
 
         cm.Items.Add(fromClipboard);
         cm.Items.Add(manualTrojan);
