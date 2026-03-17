@@ -348,7 +348,7 @@
                                     </Button.Template>
                                 </Button>
                                 <TextBlock Text="Профиль" Foreground="#5C5C5C" VerticalAlignment="Center" Margin="0,0,12,0" />
-                                <ComboBox x:Name="uiProfileCombo" Width="340" Style="{StaticResource DefComboBox}" />
+                                <ComboBox x:Name="uiProfileCombo" Width="340" Style="{StaticResource DefComboBox}" SelectionChanged="UiProfileCombo_SelectionChanged" DisplayMemberPath="Name" SelectedValuePath="Id" />
                             </DockPanel>
                         </Border>
 

@@ -7,6 +7,12 @@ namespace v2rayN.Views;
 
 public partial class MainWindow
 {
+    private sealed class UiProfileOption
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+    }
+
     private static Config _config;
     private CheckUpdateView? _checkUpdateView;
     private BackupAndRestoreView? _backupAndRestoreView;
@@ -163,6 +169,8 @@ public partial class MainWindow
 
         AddHelpMenuItem();
         WindowsManager.Instance.RegisterGlobalHotkey(_config, OnHotkeyHandler, null);
+
+        _ = LoadProfilesToUiAsync();
     }
 
     #region Event
@@ -419,6 +427,7 @@ public partial class MainWindow
                 if (ViewModel != null)
                 {
                     await ViewModel.AddServerViaClipboardAsync(text);
+                    await LoadProfilesToUiAsync();
                     MessageBox.Show("Ключ обработан. Если формат корректный, профиль добавлен.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -442,6 +451,7 @@ public partial class MainWindow
                 if (ViewModel != null)
                 {
                     await ViewModel.AddServerViaClipboardAsync(input);
+                    await LoadProfilesToUiAsync();
                     MessageBox.Show("Ключ обработан. Если формат корректный, профиль добавлен.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -493,10 +503,51 @@ public partial class MainWindow
         return ok ? tb.Text.Trim() : string.Empty;
     }
 
+    private async Task LoadProfilesToUiAsync()
+    {
+        var profiles = await AppManager.Instance.ProfileItems(_config.SubIndexId) ?? [];
+        var options = profiles
+            .Where(p => !p.IndexId.IsNullOrEmpty())
+            .Select(p => new UiProfileOption
+            {
+                Id = p.IndexId,
+                Name = p.Remarks.IsNullOrEmpty() ? p.GetSummary() : p.Remarks
+            })
+            .ToList();
+
+        uiProfileCombo.ItemsSource = options;
+        if (_config.IndexId.IsNotEmpty())
+        {
+            uiProfileCombo.SelectedValue = _config.IndexId;
+        }
+        else if (options.Count > 0)
+        {
+            uiProfileCombo.SelectedIndex = 0;
+            _config.IndexId = options[0].Id;
+            await ConfigHandler.SaveConfig(_config);
+        }
+    }
+
+    private async void UiProfileCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (uiProfileCombo.SelectedValue is not string id || id.IsNullOrEmpty())
+        {
+            return;
+        }
+
+        _config.IndexId = id;
+        await ConfigHandler.SaveConfig(_config);
+        AppEvents.SetDefaultServerRequested.Publish(id);
+    }
+
     private void BtnConnectMain_Click(object sender, RoutedEventArgs e)
     {
-        // Quick action: apply system proxy mode (closest to "connect" UX in v2rayN)
+        if (uiProfileCombo.SelectedValue is string id && id.IsNotEmpty())
+        {
+            AppEvents.SetDefaultServerRequested.Publish(id);
+        }
         AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
+        MessageBox.Show("Попытка подключения запущена", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
     }
     #endregion Event
 
