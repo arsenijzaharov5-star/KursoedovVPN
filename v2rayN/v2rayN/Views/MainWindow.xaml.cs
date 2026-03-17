@@ -1,5 +1,6 @@
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using MaterialDesignThemes.Wpf;
 using v2rayN.Manager;
 
@@ -16,10 +17,23 @@ public partial class MainWindow
     private static Config _config;
     private CheckUpdateView? _checkUpdateView;
     private BackupAndRestoreView? _backupAndRestoreView;
+    private readonly DispatcherTimer _connTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private DateTime? _connectedAt;
 
     public MainWindow()
     {
         InitializeComponent();
+
+        _connTimer.Tick += (_, _) =>
+        {
+            if (_connectedAt == null)
+            {
+                txtConnTimer.Text = "00:00:00";
+                return;
+            }
+            var span = DateTime.Now - _connectedAt.Value;
+            txtConnTimer.Text = span.ToString(@"hh\:mm\:ss");
+        };
 
         _config = AppManager.Instance.Config;
         ThreadPool.RegisterWaitForSingleObject(App.ProgramStarted, OnProgramStarted, null, -1, false);
@@ -556,16 +570,66 @@ public partial class MainWindow
         return after > before;
     }
 
-    private void BtnConnectMain_Click(object sender, RoutedEventArgs e)
+    private void SetConnectVisual(bool connected)
     {
-        if (uiProfileCombo.SelectedValue is string id && id.IsNotEmpty())
+        if (connected)
         {
-            AppEvents.SetDefaultServerRequested.Publish(id);
+            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A"));
+            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A"));
+            txtConnStatus.Text = "Подключено";
+            txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#111111"));
+            if (_connectedAt == null)
+            {
+                _connectedAt = DateTime.Now;
+                _connTimer.Start();
+            }
         }
+        else
+        {
+            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1C1C1C"));
+            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1C1C1C"));
+            txtConnStatus.Text = "Не подключено";
+            txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C5C5C"));
+            _connectedAt = null;
+            _connTimer.Stop();
+            txtConnTimer.Text = "00:00:00";
+        }
+    }
 
-        _ = ViewModel?.ReloadCmd.Execute();
-        AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
-        MessageBox.Show("Подключение запущено (перезапуск ядра + системный прокси)", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+    private async void BtnConnectMain_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (uiProfileCombo.SelectedValue is string id && id.IsNotEmpty())
+            {
+                AppEvents.SetDefaultServerRequested.Publish(id);
+            }
+
+            if (ViewModel != null)
+            {
+                await ViewModel.Reload();
+            }
+            AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
+            await Task.Delay(500);
+
+            var connected =
+                AppManager.Instance.IsRunningCore(ECoreType.Xray)
+                || AppManager.Instance.IsRunningCore(ECoreType.sing_box)
+                || AppManager.Instance.IsRunningCore(ECoreType.mihomo)
+                || AppManager.Instance.IsRunningCore(ECoreType.v2fly)
+                || AppManager.Instance.IsRunningCore(ECoreType.v2fly_v5);
+            SetConnectVisual(connected);
+
+            if (!connected)
+            {
+                MessageBox.Show("Подключение не стартовало. Проверь ключ/профиль и логи ядра.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetConnectVisual(false);
+            MessageBox.Show(ex.Message, "Ошибка подключения", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
     #endregion Event
 

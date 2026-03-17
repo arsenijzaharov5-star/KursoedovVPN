@@ -355,7 +355,7 @@
                         <Border Grid.Row="1" Background="#FFFFFF" BorderBrush="#D9D9D9" BorderThickness="1" CornerRadius="12" Padding="20" Margin="0,0,0,14">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="Время подключения" FontSize="16" Foreground="#5C5C5C" HorizontalAlignment="Center" />
-                                <TextBlock Text="00:00:00" FontSize="42" FontWeight="SemiBold" Foreground="#111111" HorizontalAlignment="Center" Margin="0,8,0,16" />
+                                <TextBlock x:Name="txtConnTimer" Text="00:00:00" FontSize="42" FontWeight="SemiBold" Foreground="#111111" HorizontalAlignment="Center" Margin="0,8,0,16" />
                                 <Button x:Name="btnConnectMain" Width="104" Height="104" HorizontalAlignment="Center" Click="BtnConnectMain_Click" Background="#1C1C1C" Foreground="White" BorderBrush="#1C1C1C" FontSize="34">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
@@ -365,7 +365,7 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                                <TextBlock Text="Не подключено" Foreground="#5C5C5C" HorizontalAlignment="Center" Margin="0,12,0,0" />
+                                <TextBlock x:Name="txtConnStatus" Text="Не подключено" Foreground="#5C5C5C" HorizontalAlignment="Center" Margin="0,12,0,0" />
                             </StackPanel>
                         </Border>
 
