@@ -366,6 +366,7 @@
                                     </Button.Template>
                                 </Button>
                                 <TextBlock x:Name="txtConnStatus" Text="Не подключено" Foreground="#5C5C5C" HorizontalAlignment="Center" Margin="0,12,0,0" />
+                                <TextBlock x:Name="txtConnSpeed" Text="Скорость: 0 B/s" Foreground="#5C5C5C" HorizontalAlignment="Center" Margin="0,8,0,0" />
                             </StackPanel>
                         </Border>
 

@@ -19,6 +19,7 @@ public partial class MainWindow
     private BackupAndRestoreView? _backupAndRestoreView;
     private readonly DispatcherTimer _connTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private DateTime? _connectedAt;
+    private bool _isConnectedUi;
 
     public MainWindow()
     {
@@ -29,10 +30,13 @@ public partial class MainWindow
             if (_connectedAt == null)
             {
                 txtConnTimer.Text = "00:00:00";
+                txtConnSpeed.Text = "Скорость: 0 B/s";
                 return;
             }
             var span = DateTime.Now - _connectedAt.Value;
             txtConnTimer.Text = span.ToString(@"hh\:mm\:ss");
+            var sp = StatusBarViewModel.Instance.SpeedProxyDisplay;
+            txtConnSpeed.Text = $"Скорость: {(sp.IsNullOrEmpty() ? "0 B/s" : sp)}";
         };
 
         _config = AppManager.Instance.Config;
@@ -572,6 +576,7 @@ public partial class MainWindow
 
     private void SetConnectVisual(bool connected)
     {
+        _isConnectedUi = connected;
         if (connected)
         {
             btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A"));
@@ -593,6 +598,7 @@ public partial class MainWindow
             _connectedAt = null;
             _connTimer.Stop();
             txtConnTimer.Text = "00:00:00";
+            txtConnSpeed.Text = "Скорость: 0 B/s";
         }
     }
 
@@ -600,6 +606,14 @@ public partial class MainWindow
     {
         try
         {
+            if (_isConnectedUi)
+            {
+                await CoreManager.Instance.CoreStop();
+                AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedClear);
+                SetConnectVisual(false);
+                return;
+            }
+
             if (uiProfileCombo.SelectedValue is string id && id.IsNotEmpty())
             {
                 AppEvents.SetDefaultServerRequested.Publish(id);
@@ -610,7 +624,7 @@ public partial class MainWindow
                 await ViewModel.Reload();
             }
             AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
-            await Task.Delay(500);
+            await Task.Delay(600);
 
             var connected =
                 AppManager.Instance.IsRunningCore(ECoreType.Xray)
