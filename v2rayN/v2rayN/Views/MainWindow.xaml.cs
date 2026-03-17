@@ -1,6 +1,3 @@
-using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -569,12 +566,26 @@ public partial class MainWindow
 
     private async Task<bool> ImportLinkAndRefreshAsync(string link)
     {
-        var before = (await AppManager.Instance.ProfileItems(_config.SubIndexId))?.Count ?? 0;
+        var beforeProfiles = await AppManager.Instance.ProfileItems(_config.SubIndexId) ?? [];
+        var beforeIds = beforeProfiles.Select(x => x.IndexId).Where(x => x.IsNotEmpty()).ToHashSet();
+
         await ViewModel.AddServerViaClipboardAsync(link.Trim());
         await Task.Delay(300);
+
+        var afterProfiles = await AppManager.Instance.ProfileItems(_config.SubIndexId) ?? [];
+        var added = afterProfiles.FirstOrDefault(x => x.IndexId.IsNotEmpty() && !beforeIds.Contains(x.IndexId));
+
         await LoadProfilesToUiAsync();
-        var after = (await AppManager.Instance.ProfileItems(_config.SubIndexId))?.Count ?? 0;
-        return after > before;
+
+        if (added?.IndexId is { } newId && newId.IsNotEmpty())
+        {
+            uiProfileCombo.SelectedValue = newId;
+            _config.IndexId = newId;
+            await ConfigHandler.SaveConfig(_config);
+            AppEvents.SetDefaultServerRequested.Publish(newId);
+        }
+
+        return added != null;
     }
 
     private void SetConnectVisual(bool connected)
@@ -582,10 +593,10 @@ public partial class MainWindow
         _isConnectedUi = connected;
         if (connected)
         {
-            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A"));
-            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A"));
+            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B3B3B"));
+            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B3B3B"));
             txtConnStatus.Text = "Подключено";
-            txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#111111"));
+            txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#222222"));
             if (_connectedAt == null)
             {
                 _connectedAt = DateTime.Now;
@@ -594,10 +605,10 @@ public partial class MainWindow
         }
         else
         {
-            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1C1C1C"));
-            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1C1C1C"));
+            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2F2F2F"));
+            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2F2F2F"));
             txtConnStatus.Text = "Не подключено";
-            txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C5C5C"));
+            txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B6B6B"));
             _connectedAt = null;
             _connTimer.Stop();
             txtConnTimer.Text = "00:00:00";
@@ -605,50 +616,14 @@ public partial class MainWindow
         }
     }
 
-    private async Task<bool> VerifyTunnelAsync()
+    private static bool IsAnyCoreRunning()
     {
-        var running =
+        return
             AppManager.Instance.IsRunningCore(ECoreType.Xray)
             || AppManager.Instance.IsRunningCore(ECoreType.sing_box)
             || AppManager.Instance.IsRunningCore(ECoreType.mihomo)
             || AppManager.Instance.IsRunningCore(ECoreType.v2fly)
             || AppManager.Instance.IsRunningCore(ECoreType.v2fly_v5);
-        if (!running)
-        {
-            return false;
-        }
-
-        var socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
-        try
-        {
-            using var tcp = new TcpClient();
-            var connectTask = tcp.ConnectAsync("127.0.0.1", socksPort);
-            var done = await Task.WhenAny(connectTask, Task.Delay(1200));
-            if (done != connectTask || !tcp.Connected)
-            {
-                return false;
-            }
-        }
-        catch
-        {
-            return false;
-        }
-
-        try
-        {
-            var handler = new HttpClientHandler
-            {
-                Proxy = new WebProxy($"http://127.0.0.1:{socksPort}"),
-                UseProxy = true,
-            };
-            using var http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(4) };
-            using var resp = await http.GetAsync("http://clients3.google.com/generate_204");
-            return resp.IsSuccessStatusCode;
-        }
-        catch
-        {
-            return false;
-        }
     }
 
     private async void BtnConnectMain_Click(object sender, RoutedEventArgs e)
@@ -663,30 +638,36 @@ public partial class MainWindow
                 return;
             }
 
-            if (uiProfileCombo.SelectedValue is string id && id.IsNotEmpty())
+            if (uiProfileCombo.SelectedValue is not string id || id.IsNullOrEmpty())
             {
-                AppEvents.SetDefaultServerRequested.Publish(id);
+                MessageBox.Show("Сначала добавь и выбери профиль (trojan://...)", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
-            if (ViewModel != null)
+            AppEvents.SetDefaultServerRequested.Publish(id);
+
+            if (ViewModel == null)
             {
-                await ViewModel.Reload();
+                MessageBox.Show("Внутренняя ошибка: ViewModel не инициализирован", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
+
+            await ViewModel.Reload();
             AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
-            await Task.Delay(800);
+            await Task.Delay(900);
 
-            var connected = await VerifyTunnelAsync();
+            var connected = IsAnyCoreRunning();
             SetConnectVisual(connected);
 
             if (!connected)
             {
-                MessageBox.Show("Туннель не поднялся или трафик не проходит. Проверь ключ trojan:// и сетевые настройки.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Core не запустился. Проверь корректность ключа trojan:// и настройки профиля.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)
         {
             SetConnectVisual(false);
-            MessageBox.Show(ex.Message, "Ошибка подключения", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Ошибка подключения: {ex.Message}", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
     #endregion Event
