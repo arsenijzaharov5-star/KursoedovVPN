@@ -426,9 +426,12 @@ public partial class MainWindow
 
                 if (ViewModel != null)
                 {
-                    await ViewModel.AddServerViaClipboardAsync(text);
-                    await LoadProfilesToUiAsync();
-                    MessageBox.Show("Ключ обработан. Если формат корректный, профиль добавлен.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+                    var ok = await ImportLinkAndRefreshAsync(text);
+                    MessageBox.Show(ok
+                            ? "Профиль добавлен. Выбери его в списке профилей."
+                            : "Ключ не импортирован. Проверь формат ссылки (trojan://...)",
+                        "kursoedovVPN", MessageBoxButton.OK,
+                        ok ? MessageBoxImage.Information : MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -450,9 +453,12 @@ public partial class MainWindow
 
                 if (ViewModel != null)
                 {
-                    await ViewModel.AddServerViaClipboardAsync(input);
-                    await LoadProfilesToUiAsync();
-                    MessageBox.Show("Ключ обработан. Если формат корректный, профиль добавлен.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+                    var ok = await ImportLinkAndRefreshAsync(input);
+                    MessageBox.Show(ok
+                            ? "Профиль добавлен. Выбери его в списке профилей."
+                            : "Ключ не импортирован. Проверь формат ссылки (trojan://...)",
+                        "kursoedovVPN", MessageBoxButton.OK,
+                        ok ? MessageBoxImage.Information : MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -540,14 +546,26 @@ public partial class MainWindow
         AppEvents.SetDefaultServerRequested.Publish(id);
     }
 
+    private async Task<bool> ImportLinkAndRefreshAsync(string link)
+    {
+        var before = (await AppManager.Instance.ProfileItems(_config.SubIndexId))?.Count ?? 0;
+        await ViewModel.AddServerViaClipboardAsync(link.Trim());
+        await Task.Delay(300);
+        await LoadProfilesToUiAsync();
+        var after = (await AppManager.Instance.ProfileItems(_config.SubIndexId))?.Count ?? 0;
+        return after > before;
+    }
+
     private void BtnConnectMain_Click(object sender, RoutedEventArgs e)
     {
         if (uiProfileCombo.SelectedValue is string id && id.IsNotEmpty())
         {
             AppEvents.SetDefaultServerRequested.Publish(id);
         }
+
+        _ = ViewModel?.ReloadCmd.Execute();
         AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
-        MessageBox.Show("Попытка подключения запущена", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show("Подключение запущено (перезапуск ядра + системный прокси)", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
     }
     #endregion Event
 
