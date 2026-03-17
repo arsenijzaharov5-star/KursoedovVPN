@@ -1,3 +1,6 @@
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -602,6 +605,52 @@ public partial class MainWindow
         }
     }
 
+    private async Task<bool> VerifyTunnelAsync()
+    {
+        var running =
+            AppManager.Instance.IsRunningCore(ECoreType.Xray)
+            || AppManager.Instance.IsRunningCore(ECoreType.sing_box)
+            || AppManager.Instance.IsRunningCore(ECoreType.mihomo)
+            || AppManager.Instance.IsRunningCore(ECoreType.v2fly)
+            || AppManager.Instance.IsRunningCore(ECoreType.v2fly_v5);
+        if (!running)
+        {
+            return false;
+        }
+
+        var socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+        try
+        {
+            using var tcp = new TcpClient();
+            var connectTask = tcp.ConnectAsync("127.0.0.1", socksPort);
+            var done = await Task.WhenAny(connectTask, Task.Delay(1200));
+            if (done != connectTask || !tcp.Connected)
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+
+        try
+        {
+            var handler = new HttpClientHandler
+            {
+                Proxy = new WebProxy($"http://127.0.0.1:{socksPort}"),
+                UseProxy = true,
+            };
+            using var http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(4) };
+            using var resp = await http.GetAsync("http://clients3.google.com/generate_204");
+            return resp.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private async void BtnConnectMain_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -624,19 +673,14 @@ public partial class MainWindow
                 await ViewModel.Reload();
             }
             AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
-            await Task.Delay(600);
+            await Task.Delay(800);
 
-            var connected =
-                AppManager.Instance.IsRunningCore(ECoreType.Xray)
-                || AppManager.Instance.IsRunningCore(ECoreType.sing_box)
-                || AppManager.Instance.IsRunningCore(ECoreType.mihomo)
-                || AppManager.Instance.IsRunningCore(ECoreType.v2fly)
-                || AppManager.Instance.IsRunningCore(ECoreType.v2fly_v5);
+            var connected = await VerifyTunnelAsync();
             SetConnectVisual(connected);
 
             if (!connected)
             {
-                MessageBox.Show("Подключение не стартовало. Проверь ключ/профиль и логи ядра.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Туннель не поднялся или трафик не проходит. Проверь ключ trojan:// и сетевые настройки.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)
