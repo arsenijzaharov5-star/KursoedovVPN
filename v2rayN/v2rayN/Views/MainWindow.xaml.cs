@@ -2,6 +2,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using MaterialDesignThemes.Wpf;
+using ServiceLib.Handler;
+using System.Net;
 using v2rayN.Manager;
 
 namespace v2rayN.Views;
@@ -626,6 +628,32 @@ public partial class MainWindow
             || AppManager.Instance.IsRunningCore(ECoreType.v2fly_v5);
     }
 
+    private static async Task<bool> IsTunnelHealthyAsync()
+    {
+        try
+        {
+            var port = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+            if (port <= 0)
+            {
+                return false;
+            }
+
+            var url = AppManager.Instance.Config.SpeedTestItem.SpeedPingTestUrl;
+            if (url.IsNullOrEmpty())
+            {
+                url = Global.SpeedPingTestUrls.FirstOrDefault() ?? "https://www.gstatic.com/generate_204";
+            }
+
+            var proxy = new WebProxy($"socks5://{Global.Loopback}:{port}");
+            var ping = await ConnectionHandler.GetRealPingTime(url, proxy, 8);
+            return ping > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private async void BtnConnectMain_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -653,15 +681,26 @@ public partial class MainWindow
             }
 
             await ViewModel.Reload();
-            AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
             await Task.Delay(900);
 
-            var connected = IsAnyCoreRunning();
-            SetConnectVisual(connected);
+            var coreRunning = IsAnyCoreRunning();
+            var tunnelHealthy = coreRunning && await IsTunnelHealthyAsync();
 
-            if (!connected)
+            if (tunnelHealthy)
             {
-                MessageBox.Show("Core не запустился. Проверь корректность ключа trojan:// и настройки профиля.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
+                SetConnectVisual(true);
+            }
+            else
+            {
+                await CoreManager.Instance.CoreStop();
+                AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedClear);
+                SetConnectVisual(false);
+                MessageBox.Show(
+                    "Туннель не поднялся: core не дал рабочий прокси. Проверь ключ trojan://, SNI/порт и доступность сервера.",
+                    "kursoedovVPN",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)
