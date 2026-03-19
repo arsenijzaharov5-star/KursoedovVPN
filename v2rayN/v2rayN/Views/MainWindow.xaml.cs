@@ -450,6 +450,85 @@ public partial class MainWindow
     {
     }
 
+    private void BtnViewLogs_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var logDir = Utils.GetLogPath();
+            if (!Directory.Exists(logDir))
+            {
+                MessageBox.Show("Папка логов пока не создана.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var files = Directory.GetFiles(logDir, "*.txt")
+                .OrderByDescending(File.GetLastWriteTime)
+                .Take(3)
+                .ToList();
+
+            if (files.Count == 0)
+            {
+                MessageBox.Show("Логи пока пустые.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var parts = new List<string>();
+            foreach (var f in files)
+            {
+                var lines = File.ReadLines(f).TakeLast(120);
+                parts.Add($"===== {Path.GetFileName(f)} =====\n" + string.Join("\n", lines));
+            }
+
+            var dialog = new Window
+            {
+                Title = "Логи подключения",
+                Width = 980,
+                Height = 700,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this
+            };
+
+            var root = new DockPanel { Margin = new Thickness(10) };
+
+            var top = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+            var btnOpenFolder = new Button { Content = "Открыть папку логов", Width = 180, Height = 30, Margin = new Thickness(0, 0, 8, 0) };
+            btnOpenFolder.Click += (_, _) => ProcUtils.ProcessStart(logDir);
+            var btnCopy = new Button { Content = "Скопировать", Width = 120, Height = 30 };
+
+            var tb = new TextBox
+            {
+                FontFamily = new FontFamily("Consolas"),
+                FontSize = 12,
+                IsReadOnly = true,
+                TextWrapping = TextWrapping.NoWrap,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                AcceptsReturn = true,
+                AcceptsTab = true,
+                Text = string.Join("\n\n", parts)
+            };
+
+            btnCopy.Click += (_, _) =>
+            {
+                Clipboard.SetText(tb.Text ?? string.Empty);
+                MessageBox.Show("Логи скопированы в буфер.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+            };
+
+            top.Children.Add(btnOpenFolder);
+            top.Children.Add(btnCopy);
+            DockPanel.SetDock(top, Dock.Top);
+            root.Children.Add(top);
+            root.Children.Add(tb);
+
+            dialog.Content = root;
+            _ = dialog.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка чтения логов: {ex.Message}", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private async void BtnDeleteProfile_Click(object sender, RoutedEventArgs e)
     {
         try
