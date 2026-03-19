@@ -338,28 +338,19 @@
                         <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#D9D9D9" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,14">
                             <DockPanel>
                                 <Button x:Name="btnAddKey" Width="42" Height="42" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Style="{StaticResource DefButton}" FontSize="24" FontWeight="Bold" FontFamily="Segoe UI" Click="BtnAddKey_Click" ToolTip="Добавить ключ">
-                                     <Button.Template>
-                                         <ControlTemplate TargetType="Button">
-                                             <Border CornerRadius="21" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
-                                                 <TextBlock Text="+" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" />
-                                             </Border>
-                                         </ControlTemplate>
-                                     </Button.Template>
-                                 </Button>
-+                                <Button x:Name="btnDeleteProfile" Width="42" Height="42" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Style="{StaticResource DefButton}" Click="BtnDeleteProfile_Click" ToolTip="Удалить выбранный профиль">
-+                                    <Button.Template>
-+                                        <ControlTemplate TargetType="Button">
-+                                            <Border CornerRadius="21" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
-+                                                <materialDesign:PackIcon Kind="DeleteOutline" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
-+                                            </Border>
-+                                        </ControlTemplate>
-+                                    </Button.Template>
-+                                </Button>
-                                 <TextBlock Text="Профиль" Foreground="#5C5C5C" VerticalAlignment="Center" Margin="0,0,12,0" />
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border CornerRadius="21" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
                                                 <TextBlock Text="+" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button x:Name="btnDeleteProfile" Width="42" Height="42" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Style="{StaticResource DefButton}" Click="BtnDeleteProfile_Click" ToolTip="Удалить выбранный профиль">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border CornerRadius="21" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                                                <materialDesign:PackIcon Kind="DeleteOutline" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
                                             </Border>
                                         </ControlTemplate>
                                     </Button.Template>
