@@ -588,6 +588,49 @@ public partial class MainWindow
         AppEvents.SetDefaultServerRequested.Publish(id);
     }
 
+    private static void ApplyStrictTrojanTemplate(ProfileItem item, string link)
+    {
+        if (item.ConfigType != EConfigType.Trojan)
+        {
+            return;
+        }
+
+        var url = Utils.TryUri(link);
+        var query = url != null ? Utils.ParseQueryString(url.Query) : null;
+
+        // 1) Всегда держим транспорт строго как в рабочем v2box профиле.
+        item.Network = nameof(ETransport.tcp);
+        item.HeaderType = Global.None;
+        item.StreamSecurity = Global.StreamSecurity; // tls
+        item.AllowInsecure = "false";
+        item.Alpn = "h2";
+        item.Fingerprint = "chrome";
+        item.RequestHost = string.Empty;
+        item.Path = string.Empty;
+
+        // 2) Поля из ссылки (источник истины).
+        if (url != null)
+        {
+            item.Address = url.IdnHost;
+            item.Port = url.Port;
+            item.Password = Utils.UrlDecode(url.UserInfo);
+
+            var remarks = url.GetComponents(UriComponents.Fragment, UriFormat.Unescaped);
+            if (remarks.IsNotEmpty())
+            {
+                item.Remarks = remarks;
+            }
+
+            var sni = Utils.UrlDecode(query?["sni"] ?? string.Empty);
+            item.Sni = sni.IsNotEmpty() ? sni : "vpn.kursoedov.xyz";
+        }
+
+        if (item.Sni.IsNullOrEmpty())
+        {
+            item.Sni = "vpn.kursoedov.xyz";
+        }
+    }
+
     private async Task<bool> ImportLinkAndRefreshAsync(string link)
     {
         var beforeProfiles = await AppManager.Instance.ProfileItems(_config.SubIndexId) ?? [];
@@ -599,14 +642,24 @@ public partial class MainWindow
         var afterProfiles = await AppManager.Instance.ProfileItems(_config.SubIndexId) ?? [];
         var added = afterProfiles.FirstOrDefault(x => x.IndexId.IsNotEmpty() && !beforeIds.Contains(x.IndexId));
 
-        await LoadProfilesToUiAsync();
-
         if (added?.IndexId is { } newId && newId.IsNotEmpty())
         {
-            uiProfileCombo.SelectedValue = newId;
-            _config.IndexId = newId;
+            var saved = await AppManager.Instance.GetProfileItem(newId);
+            if (saved != null)
+            {
+                ApplyStrictTrojanTemplate(saved, link.Trim());
+                await ConfigHandler.AddServer(_config, saved);
+            }
+        }
+
+        await LoadProfilesToUiAsync();
+
+        if (added?.IndexId is { } id && id.IsNotEmpty())
+        {
+            uiProfileCombo.SelectedValue = id;
+            _config.IndexId = id;
             await ConfigHandler.SaveConfig(_config);
-            AppEvents.SetDefaultServerRequested.Publish(newId);
+            AppEvents.SetDefaultServerRequested.Publish(id);
         }
 
         return added != null;
