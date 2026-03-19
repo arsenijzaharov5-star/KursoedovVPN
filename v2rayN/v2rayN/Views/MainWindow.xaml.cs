@@ -472,10 +472,29 @@ public partial class MainWindow
                 return;
             }
 
+            static IEnumerable<string> ReadLastLinesSafe(string path, int maxLines)
+            {
+                try
+                {
+                    using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                    using var sr = new StreamReader(fs);
+                    var all = new List<string>();
+                    while (!sr.EndOfStream)
+                    {
+                        all.Add(sr.ReadLine() ?? string.Empty);
+                    }
+                    return all.TakeLast(maxLines);
+                }
+                catch (Exception ex)
+                {
+                    return [$"[Не удалось прочитать лог: {ex.Message}]"];
+                }
+            }
+
             var parts = new List<string>();
             foreach (var f in files)
             {
-                var lines = File.ReadLines(f).TakeLast(120);
+                var lines = ReadLastLinesSafe(f, 120);
                 parts.Add($"===== {Path.GetFileName(f)} =====\n" + string.Join("\n", lines));
             }
 
@@ -899,10 +918,23 @@ public partial class MainWindow
             }
 
             await ViewModel.Reload();
-            await Task.Delay(900);
 
-            var coreRunning = IsAnyCoreRunning();
-            var tunnelHealthy = coreRunning && await IsTunnelHealthyAsync();
+            var tunnelHealthy = false;
+            for (var i = 0; i < 5; i++)
+            {
+                await Task.Delay(700);
+                var coreRunning = IsAnyCoreRunning();
+                if (!coreRunning)
+                {
+                    continue;
+                }
+
+                tunnelHealthy = await IsTunnelHealthyAsync();
+                if (tunnelHealthy)
+                {
+                    break;
+                }
+            }
 
             if (tunnelHealthy)
             {
