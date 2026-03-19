@@ -760,15 +760,32 @@ public partial class MainWindow
                 return false;
             }
 
-            var url = AppManager.Instance.Config.SpeedTestItem.SpeedPingTestUrl;
-            if (url.IsNullOrEmpty())
+            var candidates = new List<string>();
+            var cfgUrl = AppManager.Instance.Config.SpeedTestItem.SpeedPingTestUrl;
+            if (cfgUrl.IsNotEmpty())
             {
-                url = Global.SpeedPingTestUrls.FirstOrDefault() ?? "https://www.gstatic.com/generate_204";
+                candidates.Add(cfgUrl);
             }
 
+            candidates.AddRange(
+            [
+                "https://cp.cloudflare.com/generate_204",
+                "https://www.cloudflare.com/cdn-cgi/trace",
+                "https://www.gstatic.com/generate_204",
+                "https://www.msftconnecttest.com/connecttest.txt"
+            ]);
+
             var proxy = new WebProxy($"socks5://{Global.Loopback}:{port}");
-            var ping = await ConnectionHandler.GetRealPingTime(url, proxy, 8);
-            return ping > 0;
+            foreach (var url in candidates.Distinct())
+            {
+                var ping = await ConnectionHandler.GetRealPingTime(url, proxy, 8);
+                if (ping > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
         catch
         {
