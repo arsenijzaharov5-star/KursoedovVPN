@@ -323,9 +323,8 @@
                     <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#D9D9D9" BorderThickness="0,0,1,0">
                         <StackPanel Margin="18,20,18,20">
                             <TextBlock Text="kursoedovVPN" FontSize="22" FontWeight="SemiBold" Foreground="#111111" Margin="0,0,0,26" />
-                            <Button x:Name="btnNavHome" Style="{StaticResource DefButton}" Content="Главная" Margin="0,0,0,10" Click="BtnNavHome_Click" />
-                                                        <Button x:Name="btnNavSettings" Style="{StaticResource DefButton}" Content="Настройки" Margin="0,0,0,10" Click="BtnNavSettings_Click" />
-                                                        <Border Height="0" />
+                            <Button x:Name="btnNavSettings" Style="{StaticResource DefButton}" Content="Параметры VPN" Margin="0,0,0,10" Click="BtnNavSettings_Click" />
+                            <Border Height="0" />
                         </StackPanel>
                     </Border>
 

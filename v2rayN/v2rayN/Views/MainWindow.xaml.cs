@@ -414,9 +414,31 @@ public partial class MainWindow
         TriggerMenuClick(menuSubSetting);
     }
 
-    private void BtnNavSettings_Click(object sender, RoutedEventArgs e)
+    private async void BtnNavSettings_Click(object sender, RoutedEventArgs e)
     {
-        _ = new OptionSettingWindow().ShowDialog();
+        try
+        {
+            if (uiProfileCombo.SelectedValue is not string id || id.IsNullOrEmpty())
+            {
+                MessageBox.Show("Сначала добавь и выбери профиль.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var profiles = await AppManager.Instance.ProfileItems(_config.SubIndexId) ?? [];
+            var profile = profiles.FirstOrDefault(p => p.IndexId == id);
+            if (profile == null)
+            {
+                MessageBox.Show("Профиль не найден.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            _ = new AddServerWindow(profile).ShowDialog();
+            await LoadProfilesToUiAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка открытия параметров: {ex.Message}", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void BtnNavLogs_Click(object sender, RoutedEventArgs e)
