@@ -450,6 +450,53 @@ public partial class MainWindow
     {
     }
 
+    private async void BtnDeleteProfile_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (uiProfileCombo.SelectedValue is not string id || id.IsNullOrEmpty())
+            {
+                MessageBox.Show("Выбери профиль для удаления.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var item = await AppManager.Instance.GetProfileItem(id);
+            if (item == null)
+            {
+                MessageBox.Show("Профиль не найден.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Удалить профиль '{(item.Remarks.IsNullOrEmpty() ? item.GetSummary() : item.Remarks)}'?",
+                "kursoedovVPN",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            await ConfigHandler.RemoveServers(_config, new List<ProfileItem> { item });
+            await LoadProfilesToUiAsync();
+
+            var profiles = await AppManager.Instance.ProfileItems(_config.SubIndexId) ?? [];
+            if (profiles.Count == 0)
+            {
+                _config.IndexId = string.Empty;
+                await ConfigHandler.SaveConfig(_config);
+                SetConnectVisual(false);
+            }
+
+            MessageBox.Show("Профиль удалён.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка удаления профиля: {ex.Message}", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private void BtnAddKey_Click(object sender, RoutedEventArgs e)
     {
         var cm = new ContextMenu();
