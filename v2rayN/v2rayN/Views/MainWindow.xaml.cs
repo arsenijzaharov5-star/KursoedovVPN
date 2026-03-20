@@ -227,11 +227,13 @@ public partial class MainWindow
         var backgroundsDir = Path.Combine(baseDir, "Resources", "Backgrounds");
         var outputVideo = Path.Combine(backgroundsDir, "WALLPAPERS.mp4");
 
+        // Preferred path: bundled lightweight MP4
         if (File.Exists(outputVideo))
         {
             return outputVideo;
         }
 
+        // Backward compatibility for older builds that used split parts
         var part00 = Path.Combine(backgroundsDir, "WALLPAPERS.mp4.part-00");
         var part01 = Path.Combine(backgroundsDir, "WALLPAPERS.mp4.part-01");
         if (!File.Exists(part00) || !File.Exists(part01))
