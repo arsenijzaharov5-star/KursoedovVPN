@@ -34,13 +34,13 @@ public partial class MainWindow
             if (_connectedAt == null)
             {
                 txtConnTimer.Text = "00:00:00";
-                txtConnSpeed.Text = "Скорость: 0 B/s";
+                txtConnSpeed.Text = "Скорость (↓/↑): 0 B/s / 0 B/s";
                 return;
             }
             var span = DateTime.Now - _connectedAt.Value;
             txtConnTimer.Text = span.ToString(@"hh\:mm\:ss");
             var sp = StatusBarViewModel.Instance.SpeedProxyDisplay;
-            txtConnSpeed.Text = $"Скорость: {(sp.IsNullOrEmpty() ? "0 B/s" : sp)}";
+            txtConnSpeed.Text = $"Скорость (↓/↑): {(sp.IsNullOrEmpty() ? "0 B/s / 0 B/s" : sp)}";
         };
 
         _config = AppManager.Instance.Config;
@@ -837,7 +837,7 @@ public partial class MainWindow
             _connectedAt = null;
             _connTimer.Stop();
             txtConnTimer.Text = "00:00:00";
-            txtConnSpeed.Text = "Скорость: 0 B/s";
+            txtConnSpeed.Text = "Скорость (↓/↑): 0 B/s / 0 B/s";
         }
     }
 
