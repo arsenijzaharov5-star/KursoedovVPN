@@ -1,4 +1,5 @@
 using System.Data;
+using System.Threading;
 
 namespace ServiceLib.Handler;
 
@@ -6,6 +7,7 @@ public static class ConfigHandler
 {
     private static readonly string _configRes = Global.ConfigFileName;
     private static readonly string _tag = "ConfigHandler";
+    private static readonly SemaphoreSlim _saveConfigLock = new(1, 1);
 
     #region ConfigHandler
 
@@ -179,29 +181,39 @@ public static class ConfigHandler
     /// <returns>0 if successful, -1 if failed</returns>
     public static async Task<int> SaveConfig(Config config)
     {
+        await _saveConfigLock.WaitAsync();
         try
         {
-            //save temp file
             var resPath = Utils.GetConfigPath(_configRes);
-            var tempPath = $"{resPath}_temp";
+            var dir = Path.GetDirectoryName(resPath);
+            if (!dir.IsNullOrEmpty())
+            {
+                Directory.CreateDirectory(dir!);
+            }
 
             var content = JsonUtils.Serialize(config, true, true);
             if (content.IsNullOrEmpty())
             {
                 return -1;
             }
+
+            // unique temp file per save to avoid races between concurrent calls
+            var tempPath = $"{resPath}.tmp.{Guid.NewGuid():N}";
             await File.WriteAllTextAsync(tempPath, content);
 
-            //rename
+            // atomic replace where possible
             File.Move(tempPath, resPath, true);
+            return 0;
         }
         catch (Exception ex)
         {
             Logging.SaveLog(_tag, ex);
             return -1;
         }
-
-        return 0;
+        finally
+        {
+            _saveConfigLock.Release();
+        }
     }
 
     #endregion ConfigHandler
