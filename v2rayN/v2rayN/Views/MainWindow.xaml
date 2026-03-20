@@ -37,7 +37,26 @@
         SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}"
         Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
         <Grid>
-            <DockPanel>
+            <Image Source="/Resources/Backgrounds/kursoedov_bg.jpg"
+                   Stretch="UniformToFill"
+                   Opacity="0.10"
+                   IsHitTestVisible="False"
+                   Panel.ZIndex="0">
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 From="0.08"
+                                                 To="0.15"
+                                                 Duration="0:0:4" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+
+            <DockPanel Panel.ZIndex="1">
                 <ToolBarTray DockPanel.Dock="Top" Visibility="Collapsed">
                     <ToolBar
                         HorizontalAlignment="Center"
@@ -320,7 +339,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#D9D9D9" BorderThickness="0,0,1,0">
+                    <Border Grid.Column="0" Background="#F0FFFFFF" BorderBrush="#D9D9D9" BorderThickness="0,0,1,0">
                         <StackPanel Margin="18,20,18,20">
                             <TextBlock Text="kursoedovVPN" FontSize="22" FontWeight="SemiBold" Foreground="#111111" Margin="0,0,0,26" />
                             <Button x:Name="btnNavSettings" Style="{StaticResource DefButton}" Content="Параметры VPN" Margin="0,0,0,10" Click="BtnNavSettings_Click" />
@@ -334,14 +353,6 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-
-                        <Image Grid.RowSpan="3"
-                               Source="/Resources/Backgrounds/kursoedov_bg.jpg"
-                               Stretch="UniformToFill"
-                               Opacity="0.14"
-                               IsHitTestVisible="False"
-                               Margin="0"
-                               Panel.ZIndex="0" />
 
                         <Border Grid.Row="0" Background="#EEFFFFFF" BorderBrush="#D9D9D9" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,14" Panel.ZIndex="1">
                             <DockPanel>
