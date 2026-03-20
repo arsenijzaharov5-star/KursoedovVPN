@@ -1132,12 +1132,17 @@ public partial class MainWindow
         }
     }
 
-    private static string BuildConnectDiagnostics(bool coreRunningSeen, bool tunnelHealthy)
+    private static bool HasWintunDll()
     {
         var baseDir = AppContext.BaseDirectory;
         var wintunInSingBox = Path.Combine(baseDir, "bin", "sing_box", "wintun.dll");
         var wintunFlat = Path.Combine(baseDir, "wintun.dll");
-        var wintunExists = File.Exists(wintunInSingBox) || File.Exists(wintunFlat);
+        return File.Exists(wintunInSingBox) || File.Exists(wintunFlat);
+    }
+
+    private static string BuildConnectDiagnostics(bool coreRunningSeen, bool tunnelHealthy)
+    {
+        var wintunExists = HasWintunDll();
         var socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
 
         return $"Диагностика:\n" +
@@ -1194,10 +1199,19 @@ public partial class MainWindow
                 await ConfigHandler.AddServer(_config, selected);
             }
 
-            // TUN-first behavior: make desktop traffic go through VPN without manual proxy setup.
-            if (!_config.TunModeItem.EnableTun)
+            // Prefer TUN when driver exists, otherwise fallback to proxy mode.
+            var hasWintun = HasWintunDll();
+            if (hasWintun)
             {
-                _config.TunModeItem.EnableTun = true;
+                if (!_config.TunModeItem.EnableTun)
+                {
+                    _config.TunModeItem.EnableTun = true;
+                    await ConfigHandler.SaveConfig(_config);
+                }
+            }
+            else if (_config.TunModeItem.EnableTun)
+            {
+                _config.TunModeItem.EnableTun = false;
                 await ConfigHandler.SaveConfig(_config);
             }
 
@@ -1252,7 +1266,15 @@ public partial class MainWindow
                 AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
                 SetConnectVisual(true);
 
-                if (!tunnelHealthy)
+                if (!hasWintun)
+                {
+                    MessageBox.Show(
+                        "wintun.dll не найден: включён режим системного прокси без TUN. На этом ПК это нормально, но часть приложений может не идти через VPN.",
+                        "kursoedovVPN",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else if (!tunnelHealthy)
                 {
                     MessageBox.Show(
                         "Core запущен, но авто-проверка туннеля не подтвердила доступ к тестовым URL. Проверь IP вручную через 2ip.ru.",
