@@ -3,7 +3,9 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using MaterialDesignThemes.Wpf;
 using ServiceLib.Handler;
+using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 using v2rayN.Manager;
 
 namespace v2rayN.Views;
@@ -849,6 +851,49 @@ public partial class MainWindow
             || AppManager.Instance.IsRunningCore(ECoreType.v2fly_v5);
     }
 
+    private static async Task<bool> IsPortOpenAsync(int port, int timeoutMs = 1200)
+    {
+        try
+        {
+            using var client = new TcpClient();
+            var connectTask = client.ConnectAsync(Global.Loopback, port);
+            var completed = await Task.WhenAny(connectTask, Task.Delay(timeoutMs));
+            return completed == connectTask && client.Connected;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool TryStartXrayFallback()
+    {
+        try
+        {
+            var xrayExe = Utils.GetBinPath(Utils.GetExeName(ECoreType.Xray.ToString()), ECoreType.Xray.ToString());
+            var configPath = Utils.GetBinConfigPath(Global.CoreConfigFileName);
+            if (!File.Exists(xrayExe) || !File.Exists(configPath))
+            {
+                return false;
+            }
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = xrayExe,
+                Arguments = $"run -c \"{configPath}\"",
+                WorkingDirectory = Path.GetDirectoryName(xrayExe) ?? Utils.GetBinPath("", ECoreType.Xray.ToString()),
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            _ = Process.Start(psi);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private static async Task<bool> IsTunnelHealthyAsync()
     {
         try
@@ -944,6 +989,25 @@ public partial class MainWindow
                 if (tunnelHealthy)
                 {
                     break;
+                }
+            }
+
+            if (!tunnelHealthy)
+            {
+                var socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+                if (socksPort > 0 && await IsPortOpenAsync(socksPort))
+                {
+                    tunnelHealthy = true;
+                    coreRunningSeen = true;
+                }
+                else if (TryStartXrayFallback())
+                {
+                    await Task.Delay(900);
+                    if (socksPort > 0 && await IsPortOpenAsync(socksPort))
+                    {
+                        tunnelHealthy = true;
+                        coreRunningSeen = true;
+                    }
                 }
             }
 
