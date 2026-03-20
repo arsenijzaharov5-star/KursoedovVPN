@@ -55,11 +55,20 @@ jobs:
         CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ../xray-win-x64.exe ./main
         CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o ../xray-win-arm64.exe ./main
 
+    - name: Download routing data files (geosite/geoip)
+      run: |
+        curl -L -o geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
+        curl -L -o geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat
+
     - name: Inject xray core into output
       run: |
         mkdir -p "$OutputPath64/bin/xray" "$OutputPathArm64/bin/xray"
         cp xray-win-x64.exe "$OutputPath64/bin/xray/xray.exe"
         cp xray-win-arm64.exe "$OutputPathArm64/bin/xray/xray.exe"
+        cp geosite.dat "$OutputPath64/bin/xray/geosite.dat"
+        cp geosite.dat "$OutputPathArm64/bin/xray/geosite.dat"
+        cp geoip.dat "$OutputPath64/bin/xray/geoip.dat"
+        cp geoip.dat "$OutputPathArm64/bin/xray/geoip.dat"
   
     - name: Upload build artifacts
       uses: actions/upload-artifact@v7.0.0
