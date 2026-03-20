@@ -62,6 +62,8 @@ public partial class MainWindow
         SizeChanged += MainWindow_LocationOrSizeChanged;
         StateChanged += MainWindow_StateChanged;
         _moveDebounceTimer.Tick += MoveDebounceTimer_Tick;
+        Deactivated += MainWindow_Deactivated;
+        Activated += MainWindow_Activated;
 
         ViewModel = new MainWindowViewModel(UpdateViewHandler);
 
@@ -210,9 +212,15 @@ public partial class MainWindow
             var videoPath = EnsureBackgroundVideo();
             if (!videoPath.IsNullOrEmpty())
             {
+                bgPoster.Opacity = 0.00;
                 bgVideo.Source = new Uri(videoPath!, UriKind.Absolute);
                 bgVideo.Position = TimeSpan.Zero;
                 bgVideo.Play();
+            }
+            else
+            {
+                bgVideo.Opacity = 0.00;
+                bgPoster.Opacity = 0.18;
             }
         }
         catch
@@ -267,8 +275,8 @@ public partial class MainWindow
             {
                 _videoPausedForMove = true;
                 bgVideo.Pause();
-                bgVideo.Opacity = 0.10;
-                bgPoster.Opacity = 0.22;
+                bgVideo.Opacity = 0.00;
+                bgPoster.Opacity = 0.18;
             }
 
             _moveDebounceTimer.Stop();
@@ -292,8 +300,8 @@ public partial class MainWindow
             }
 
             _videoPausedForMove = false;
-            bgVideo.Opacity = 0.24;
-            bgPoster.Opacity = 0.14;
+            bgVideo.Opacity = 0.22;
+            bgPoster.Opacity = 0.00;
             bgVideo.Play();
         }
         catch
@@ -309,11 +317,46 @@ public partial class MainWindow
             if (WindowState == WindowState.Minimized)
             {
                 bgVideo.Pause();
+                bgVideo.Opacity = 0.00;
+                bgPoster.Opacity = 0.18;
                 return;
             }
 
+            if (!_videoPausedForMove && bgVideo.Source is not null && IsActive)
+            {
+                bgPoster.Opacity = 0.00;
+                bgVideo.Opacity = 0.22;
+                bgVideo.Play();
+            }
+        }
+        catch
+        {
+            // ignore background video errors
+        }
+    }
+
+    private void MainWindow_Deactivated(object? sender, EventArgs e)
+    {
+        try
+        {
+            bgVideo.Pause();
+            bgVideo.Opacity = 0.00;
+            bgPoster.Opacity = 0.18;
+        }
+        catch
+        {
+            // ignore background video errors
+        }
+    }
+
+    private void MainWindow_Activated(object? sender, EventArgs e)
+    {
+        try
+        {
             if (!_videoPausedForMove && bgVideo.Source is not null)
             {
+                bgPoster.Opacity = 0.00;
+                bgVideo.Opacity = 0.22;
                 bgVideo.Play();
             }
         }
@@ -327,6 +370,8 @@ public partial class MainWindow
     {
         try
         {
+            bgPoster.Opacity = 0.00;
+            bgVideo.Opacity = 0.22;
             bgVideo.Position = TimeSpan.Zero;
             bgVideo.Play();
         }

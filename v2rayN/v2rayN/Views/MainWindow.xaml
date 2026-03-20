@@ -42,7 +42,7 @@
                               LoadedBehavior="Manual"
                               UnloadedBehavior="Manual"
                               Stretch="UniformToFill"
-                              Opacity="0.24"
+                              Opacity="0.22"
                               Volume="0"
                               RenderOptions.BitmapScalingMode="LowQuality"
                               MediaOpened="BgVideo_MediaOpened"
@@ -52,7 +52,7 @@
                        Source="/Resources/Backgrounds/kursoedov_bg.jpg"
                        Stretch="UniformToFill"
                        RenderOptions.BitmapScalingMode="LowQuality"
-                       Opacity="0.14" />
+                       Opacity="0.00" />
             </Grid>
 
             <DockPanel Panel.ZIndex="1">
