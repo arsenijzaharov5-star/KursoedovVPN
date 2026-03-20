@@ -23,8 +23,10 @@ public partial class MainWindow
     private CheckUpdateView? _checkUpdateView;
     private BackupAndRestoreView? _backupAndRestoreView;
     private readonly DispatcherTimer _connTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private readonly DispatcherTimer _moveDebounceTimer = new() { Interval = TimeSpan.FromMilliseconds(220) };
     private DateTime? _connectedAt;
     private bool _isConnectedUi;
+    private bool _videoPausedForMove;
 
     public MainWindow()
     {
@@ -56,6 +58,10 @@ public partial class MainWindow
         menuCheckUpdate.Click += MenuCheckUpdate_Click;
         menuBackupAndRestore.Click += MenuBackupAndRestore_Click;
         Loaded += MainWindow_Loaded;
+        LocationChanged += MainWindow_LocationOrSizeChanged;
+        SizeChanged += MainWindow_LocationOrSizeChanged;
+        StateChanged += MainWindow_StateChanged;
+        _moveDebounceTimer.Tick += MoveDebounceTimer_Tick;
 
         ViewModel = new MainWindowViewModel(UpdateViewHandler);
 
@@ -244,6 +250,75 @@ public partial class MainWindow
         }
 
         return outputVideo;
+    }
+
+    private void MainWindow_LocationOrSizeChanged(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (bgVideo.Source is null)
+            {
+                return;
+            }
+
+            if (!_videoPausedForMove)
+            {
+                _videoPausedForMove = true;
+                bgVideo.Pause();
+                bgVideo.Opacity = 0.10;
+                bgPoster.Opacity = 0.22;
+            }
+
+            _moveDebounceTimer.Stop();
+            _moveDebounceTimer.Start();
+        }
+        catch
+        {
+            // ignore background video errors
+        }
+    }
+
+    private void MoveDebounceTimer_Tick(object? sender, EventArgs e)
+    {
+        _moveDebounceTimer.Stop();
+
+        try
+        {
+            if (!_videoPausedForMove)
+            {
+                return;
+            }
+
+            _videoPausedForMove = false;
+            bgVideo.Opacity = 0.24;
+            bgPoster.Opacity = 0.14;
+            bgVideo.Play();
+        }
+        catch
+        {
+            // ignore background video errors
+        }
+    }
+
+    private void MainWindow_StateChanged(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                bgVideo.Pause();
+                return;
+            }
+
+            if (!_videoPausedForMove && bgVideo.Source is not null)
+            {
+                bgVideo.Play();
+            }
+        }
+        catch
+        {
+            // ignore background video errors
+        }
     }
 
     private void BgVideo_MediaOpened(object sender, RoutedEventArgs e)
