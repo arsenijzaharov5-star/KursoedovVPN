@@ -965,6 +965,13 @@ public partial class MainWindow
                 await ConfigHandler.AddServer(_config, selected);
             }
 
+            // TUN-first behavior: make desktop traffic go through VPN without manual proxy setup.
+            if (!_config.TunModeItem.EnableTun)
+            {
+                _config.TunModeItem.EnableTun = true;
+                await ConfigHandler.SaveConfig(_config);
+            }
+
             if (ViewModel == null)
             {
                 MessageBox.Show("Внутренняя ошибка: ViewModel не инициализирован", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);
