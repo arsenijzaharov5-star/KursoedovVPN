@@ -52,6 +52,19 @@ jobs:
           go env -w GOARCH=amd64
           go build -o ..\xray.exe .\main
 
+      - name: Download sing-box (windows-amd64)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $api = Invoke-RestMethod -Uri "https://api.github.com/repos/SagerNet/sing-box/releases/latest"
+          $asset = $api.assets | Where-Object { $_.name -match 'windows-amd64' -and $_.name -match '\.zip$' } | Select-Object -First 1
+          if (-not $asset) { throw "sing-box windows-amd64 asset not found" }
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile "sing-box.zip"
+          Expand-Archive -Path "sing-box.zip" -DestinationPath "sing-box" -Force
+          $exe = Get-ChildItem -Path "sing-box" -Recurse -Filter "sing-box.exe" | Select-Object -First 1
+          if (-not $exe) { throw "sing-box.exe not found after extract" }
+          Copy-Item $exe.FullName "sing-box.exe" -Force
+
       - name: Package app folder + portable zip
         shell: pwsh
         run: |
@@ -61,6 +74,7 @@ jobs:
           $appExe = Get-Item "v2rayN/v2rayN/publish-win-x64/v2rayN.exe" -ErrorAction SilentlyContinue
           if (-not $appExe) { throw "Cannot find app exe in v2rayN/v2rayN/publish-win-x64" }
           if (-not (Test-Path "xray.exe")) { throw "xray.exe not found in workspace root." }
+          if (-not (Test-Path "sing-box.exe")) { throw "sing-box.exe not found in workspace root." }
 
           $appDir = Split-Path $appExe.FullName -Parent
           New-Item -ItemType Directory -Force -Path dist | Out-Null
@@ -78,6 +92,10 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat" -OutFile "dist\bin\xray\geoip.dat"
           # keep flat copy for compatibility with old layouts
           Copy-Item xray.exe dist\xray.exe -Force
+
+          # Ensure sing-box core is present as primary runtime
+          New-Item -ItemType Directory -Force -Path dist\bin\sing_box | Out-Null
+          Copy-Item sing-box.exe dist\bin\sing_box\sing-box.exe -Force
 
           $readme = @(
             "KursoedovVPN (Windows)",

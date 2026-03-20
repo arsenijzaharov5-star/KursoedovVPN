@@ -746,7 +746,7 @@ public partial class MainWindow
         var query = url != null ? Utils.ParseQueryString(url.Query) : null;
 
         // 1) Всегда держим транспорт строго как в рабочем v2box профиле.
-        item.CoreType = ECoreType.Xray;
+        item.CoreType = ECoreType.sing_box;
         item.Network = nameof(ETransport.tcp);
         item.HeaderType = Global.None;
         item.StreamSecurity = Global.StreamSecurity; // tls
@@ -957,11 +957,11 @@ public partial class MainWindow
 
             AppEvents.SetDefaultServerRequested.Publish(id);
 
-            // Force Xray for trojan profiles to avoid sing-box mismatch on some installs.
+            // Force sing-box for trojan profiles (single-core strategy).
             var selected = await AppManager.Instance.GetProfileItem(id);
-            if (selected != null && selected.ConfigType == EConfigType.Trojan && selected.CoreType != ECoreType.Xray)
+            if (selected != null && selected.ConfigType == EConfigType.Trojan && selected.CoreType != ECoreType.sing_box)
             {
-                selected.CoreType = ECoreType.Xray;
+                selected.CoreType = ECoreType.sing_box;
                 await ConfigHandler.AddServer(_config, selected);
             }
 

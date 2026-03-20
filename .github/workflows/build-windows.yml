@@ -60,7 +60,19 @@ jobs:
         curl -L -o geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
         curl -L -o geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat
 
-    - name: Inject xray core into output
+    - name: Download sing-box binaries
+      run: |
+        URL_X64=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep browser_download_url | grep windows-amd64 | grep '.zip' | head -n1 | cut -d '"' -f4)
+        URL_ARM64=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep browser_download_url | grep windows-arm64 | grep '.zip' | head -n1 | cut -d '"' -f4)
+        test -n "$URL_X64" && test -n "$URL_ARM64"
+        curl -L -o singbox-x64.zip "$URL_X64"
+        curl -L -o singbox-arm64.zip "$URL_ARM64"
+        unzip -q singbox-x64.zip -d singbox-x64
+        unzip -q singbox-arm64.zip -d singbox-arm64
+        find singbox-x64 -name 'sing-box.exe' -exec cp {} sing-box-win-x64.exe \;
+        find singbox-arm64 -name 'sing-box.exe' -exec cp {} sing-box-win-arm64.exe \;
+
+    - name: Inject cores into output
       run: |
         mkdir -p "$OutputPath64/bin/xray" "$OutputPathArm64/bin/xray"
         cp xray-win-x64.exe "$OutputPath64/bin/xray/xray.exe"
@@ -69,6 +81,10 @@ jobs:
         cp geosite.dat "$OutputPathArm64/bin/xray/geosite.dat"
         cp geoip.dat "$OutputPath64/bin/xray/geoip.dat"
         cp geoip.dat "$OutputPathArm64/bin/xray/geoip.dat"
+
+        mkdir -p "$OutputPath64/bin/sing_box" "$OutputPathArm64/bin/sing_box"
+        cp sing-box-win-x64.exe "$OutputPath64/bin/sing_box/sing-box.exe"
+        cp sing-box-win-arm64.exe "$OutputPathArm64/bin/sing_box/sing-box.exe"
   
     - name: Upload build artifacts
       uses: actions/upload-artifact@v7.0.0
