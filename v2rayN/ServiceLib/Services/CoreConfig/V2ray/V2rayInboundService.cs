@@ -60,7 +60,7 @@ public partial class CoreConfigV2rayService
         }
         inbound.tag = protocol.ToString();
         inbound.port = inItem.LocalPort + (int)protocol;
-        inbound.protocol = EInboundProtocol.mixed.ToString();
+        inbound.protocol = EInboundProtocol.socks.ToString();
         inbound.settings.udp = inItem.UdpEnabled;
         inbound.sniffing.enabled = inItem.SniffingEnabled;
         inbound.sniffing.destOverride = inItem.DestOverride;

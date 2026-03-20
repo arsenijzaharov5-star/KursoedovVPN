@@ -158,7 +158,7 @@ public partial class CoreConfigV2rayService(CoreConfigContext context)
                 {
                     listen = Global.Loopback,
                     port = port,
-                    protocol = EInboundProtocol.mixed.ToString(),
+                    protocol = EInboundProtocol.socks.ToString(),
                 };
                 inbound.tag = inbound.protocol + inbound.port.ToString();
                 _coreConfig.inbounds.Add(inbound);
@@ -248,7 +248,7 @@ public partial class CoreConfigV2rayService(CoreConfigContext context)
                 tag = $"{EInboundProtocol.socks}{port}",
                 listen = Global.Loopback,
                 port = port,
-                protocol = EInboundProtocol.mixed.ToString(),
+                protocol = EInboundProtocol.socks.ToString(),
             });
 
             _coreConfig.routing.rules.Add(BuildFinalRule());
