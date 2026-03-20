@@ -65,6 +65,16 @@ jobs:
           if (-not $exe) { throw "sing-box.exe not found after extract" }
           Copy-Item $exe.FullName "sing-box.exe" -Force
 
+      - name: Download Wintun DLL (windows-amd64)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Invoke-WebRequest -Uri "https://www.wintun.net/builds/wintun-0.14.1.zip" -OutFile "wintun.zip"
+          Expand-Archive -Path "wintun.zip" -DestinationPath "wintun" -Force
+          $dll = Get-ChildItem -Path "wintun" -Recurse -Filter "wintun.dll" | Where-Object { $_.FullName -match "\\amd64\\" } | Select-Object -First 1
+          if (-not $dll) { throw "wintun.dll (amd64) not found after extract" }
+          Copy-Item $dll.FullName "wintun.dll" -Force
+
       - name: Package app folder + portable zip
         shell: pwsh
         run: |
@@ -75,6 +85,7 @@ jobs:
           if (-not $appExe) { throw "Cannot find app exe in v2rayN/v2rayN/publish-win-x64" }
           if (-not (Test-Path "xray.exe")) { throw "xray.exe not found in workspace root." }
           if (-not (Test-Path "sing-box.exe")) { throw "sing-box.exe not found in workspace root." }
+          if (-not (Test-Path "wintun.dll")) { throw "wintun.dll not found in workspace root." }
 
           $appDir = Split-Path $appExe.FullName -Parent
           New-Item -ItemType Directory -Force -Path dist | Out-Null
@@ -96,6 +107,7 @@ jobs:
           # Ensure sing-box core is present as primary runtime
           New-Item -ItemType Directory -Force -Path dist\bin\sing_box | Out-Null
           Copy-Item sing-box.exe dist\bin\sing_box\sing-box.exe -Force
+          Copy-Item wintun.dll dist\bin\sing_box\wintun.dll -Force
 
           $readme = @(
             "KursoedovVPN (Windows)",

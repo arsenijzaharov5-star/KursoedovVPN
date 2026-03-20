@@ -72,6 +72,13 @@ jobs:
         find singbox-x64 -name 'sing-box.exe' -exec cp {} sing-box-win-x64.exe \;
         find singbox-arm64 -name 'sing-box.exe' -exec cp {} sing-box-win-arm64.exe \;
 
+    - name: Download Wintun DLLs
+      run: |
+        curl -L -o wintun.zip https://www.wintun.net/builds/wintun-0.14.1.zip
+        unzip -q wintun.zip -d wintun
+        cp wintun/wintun/bin/amd64/wintun.dll wintun-x64.dll
+        cp wintun/wintun/bin/arm64/wintun.dll wintun-arm64.dll
+
     - name: Inject cores into output
       run: |
         mkdir -p "$OutputPath64/bin/xray" "$OutputPathArm64/bin/xray"
@@ -85,6 +92,8 @@ jobs:
         mkdir -p "$OutputPath64/bin/sing_box" "$OutputPathArm64/bin/sing_box"
         cp sing-box-win-x64.exe "$OutputPath64/bin/sing_box/sing-box.exe"
         cp sing-box-win-arm64.exe "$OutputPathArm64/bin/sing_box/sing-box.exe"
+        cp wintun-x64.dll "$OutputPath64/bin/sing_box/wintun.dll"
+        cp wintun-arm64.dll "$OutputPathArm64/bin/sing_box/wintun.dll"
   
     - name: Upload build artifacts
       uses: actions/upload-artifact@v7.0.0
