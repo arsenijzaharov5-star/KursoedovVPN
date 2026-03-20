@@ -30,6 +30,9 @@
 		<Resource Include="Resources\NotifyIcon4.ico" />
 		<Resource Include="Resources\v2rayN.ico" />
 		<Resource Include="Resources\Backgrounds\kursoedov_bg.jpg" />
+		<Content Include="Resources\Backgrounds\WALLPAPERS.mp4.part-*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup>

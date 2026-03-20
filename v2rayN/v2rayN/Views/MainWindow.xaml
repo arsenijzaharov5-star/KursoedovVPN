@@ -37,24 +37,20 @@
         SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}"
         Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
         <Grid>
-            <Image Source="/Resources/Backgrounds/kursoedov_bg.jpg"
-                   Stretch="UniformToFill"
-                   Opacity="0.20"
-                   IsHitTestVisible="False"
-                   Panel.ZIndex="0">
-                <Image.Triggers>
-                    <EventTrigger RoutedEvent="Image.Loaded">
-                        <BeginStoryboard>
-                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                 From="0.16"
-                                                 To="0.28"
-                                                 Duration="0:0:4" />
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                </Image.Triggers>
-            </Image>
+            <Grid IsHitTestVisible="False" Panel.ZIndex="0">
+                <MediaElement x:Name="bgVideo"
+                              LoadedBehavior="Manual"
+                              UnloadedBehavior="Manual"
+                              Stretch="UniformToFill"
+                              Opacity="0.28"
+                              Volume="0"
+                              MediaOpened="BgVideo_MediaOpened"
+                              MediaEnded="BgVideo_MediaEnded" />
+
+                <Image Source="/Resources/Backgrounds/kursoedov_bg.jpg"
+                       Stretch="UniformToFill"
+                       Opacity="0.08" />
+            </Grid>
 
             <DockPanel Panel.ZIndex="1">
                 <ToolBarTray DockPanel.Dock="Top" Visibility="Collapsed">

@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -54,6 +55,7 @@ public partial class MainWindow
         menuClose.Click += MenuClose_Click;
         menuCheckUpdate.Click += MenuCheckUpdate_Click;
         menuBackupAndRestore.Click += MenuBackupAndRestore_Click;
+        Loaded += MainWindow_Loaded;
 
         ViewModel = new MainWindowViewModel(UpdateViewHandler);
 
@@ -193,6 +195,81 @@ public partial class MainWindow
         WindowsManager.Instance.RegisterGlobalHotkey(_config, OnHotkeyHandler, null);
 
         _ = LoadProfilesToUiAsync();
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var videoPath = EnsureBackgroundVideo();
+            if (!videoPath.IsNullOrEmpty())
+            {
+                bgVideo.Source = new Uri(videoPath!, UriKind.Absolute);
+                bgVideo.Position = TimeSpan.Zero;
+                bgVideo.Play();
+            }
+        }
+        catch
+        {
+            // ignore background video errors
+        }
+    }
+
+    private string? EnsureBackgroundVideo()
+    {
+        var baseDir = AppContext.BaseDirectory;
+        var backgroundsDir = Path.Combine(baseDir, "Resources", "Backgrounds");
+        var outputVideo = Path.Combine(backgroundsDir, "WALLPAPERS.mp4");
+
+        if (File.Exists(outputVideo))
+        {
+            return outputVideo;
+        }
+
+        var part00 = Path.Combine(backgroundsDir, "WALLPAPERS.mp4.part-00");
+        var part01 = Path.Combine(backgroundsDir, "WALLPAPERS.mp4.part-01");
+        if (!File.Exists(part00) || !File.Exists(part01))
+        {
+            return null;
+        }
+
+        using var output = File.Create(outputVideo);
+        using (var input0 = File.OpenRead(part00))
+        {
+            input0.CopyTo(output);
+        }
+        using (var input1 = File.OpenRead(part01))
+        {
+            input1.CopyTo(output);
+        }
+
+        return outputVideo;
+    }
+
+    private void BgVideo_MediaOpened(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            bgVideo.Position = TimeSpan.Zero;
+            bgVideo.Play();
+        }
+        catch
+        {
+            // ignore background video errors
+        }
+    }
+
+    private void BgVideo_MediaEnded(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            bgVideo.Position = TimeSpan.Zero;
+            bgVideo.Play();
+        }
+        catch
+        {
+            // ignore background video errors
+        }
     }
 
     #region Event
