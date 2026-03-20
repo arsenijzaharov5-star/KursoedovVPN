@@ -1132,6 +1132,40 @@ public partial class MainWindow
         }
     }
 
+    private static string BuildConnectDiagnostics(bool coreRunningSeen, bool tunnelHealthy)
+    {
+        var baseDir = AppContext.BaseDirectory;
+        var wintunInSingBox = Path.Combine(baseDir, "bin", "sing_box", "wintun.dll");
+        var wintunFlat = Path.Combine(baseDir, "wintun.dll");
+        var wintunExists = File.Exists(wintunInSingBox) || File.Exists(wintunFlat);
+        var socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+
+        return $"Диагностика:\n" +
+               $"- core запущен: {(coreRunningSeen ? "да" : "нет")}\n" +
+               $"- туннель подтверждён: {(tunnelHealthy ? "да" : "нет")}\n" +
+               $"- socks порт: {(socksPort > 0 ? socksPort.ToString() : "не назначен")}\n" +
+               $"- wintun.dll: {(wintunExists ? "найден" : "НЕ НАЙДЕН (bin/sing_box/wintun.dll)")}";
+    }
+
+    private static string ExplainException(Exception ex)
+    {
+        if (ex is SocketException se)
+        {
+            return se.SocketErrorCode == SocketError.OperationAborted
+                ? "Операция ввода/вывода была прервана (WSA_OPERATION_ABORTED). Обычно это означает, что core/TUN перезапустился, был остановлен или трафик заблокирован защитником."
+                : $"Сетевая ошибка: {se.SocketErrorCode}";
+        }
+
+        if (ex.InnerException is SocketException ise)
+        {
+            return ise.SocketErrorCode == SocketError.OperationAborted
+                ? "Операция ввода/вывода была прервана (WSA_OPERATION_ABORTED). Обычно это означает, что core/TUN перезапустился, был остановлен или трафик заблокирован защитником."
+                : $"Сетевая ошибка: {ise.SocketErrorCode}";
+        }
+
+        return ex.Message;
+    }
+
     private async void BtnConnectMain_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -1232,8 +1266,9 @@ public partial class MainWindow
                 await CoreManager.Instance.CoreStop();
                 AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedClear);
                 SetConnectVisual(false);
+                var diag = BuildConnectDiagnostics(coreRunningSeen, tunnelHealthy);
                 MessageBox.Show(
-                    "Туннель не поднялся: core не запустился. Проверь ключ trojan://, SNI/порт и доступность сервера.",
+                    "Туннель не поднялся. Проверь ключ trojan://, SNI/порт, доступность сервера и наличие wintun.dll.\n\n" + diag,
                     "kursoedovVPN",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
@@ -1242,7 +1277,9 @@ public partial class MainWindow
         catch (Exception ex)
         {
             SetConnectVisual(false);
-            MessageBox.Show($"Ошибка подключения: {ex.Message}", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);
+            var diag = BuildConnectDiagnostics(coreRunningSeen: IsAnyCoreRunning(), tunnelHealthy: false);
+            var reason = ExplainException(ex);
+            MessageBox.Show($"Ошибка подключения: {reason}\n\n{diag}", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
     #endregion Event
