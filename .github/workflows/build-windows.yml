@@ -33,6 +33,11 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22.x'
+
     - name: Build
       run: |
         cd v2rayN 
@@ -40,6 +45,21 @@ jobs:
         dotnet publish ./v2rayN/v2rayN.csproj     -c Release -r win-arm64 -p:SelfContained=true -p:EnableWindowsTargeting=true -o $OutputPathArm64
         dotnet publish ./AmazTool/AmazTool.csproj -c Release -r win-x64   -p:SelfContained=true -p:EnableWindowsTargeting=true -p:PublishTrimmed=true -o $OutputPath64
         dotnet publish ./AmazTool/AmazTool.csproj -c Release -r win-arm64 -p:SelfContained=true -p:EnableWindowsTargeting=true -p:PublishTrimmed=true -o $OutputPathArm64
+
+    - name: Build xray-core binaries
+      run: |
+        git clone https://github.com/XTLS/Xray-core.git xray-core
+        cd xray-core
+        git submodule update --init --recursive
+
+        CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ../xray-win-x64.exe ./main
+        CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o ../xray-win-arm64.exe ./main
+
+    - name: Inject xray core into output
+      run: |
+        mkdir -p "$OutputPath64/bin/xray" "$OutputPathArm64/bin/xray"
+        cp xray-win-x64.exe "$OutputPath64/bin/xray/xray.exe"
+        cp xray-win-arm64.exe "$OutputPathArm64/bin/xray/xray.exe"
   
     - name: Upload build artifacts
       uses: actions/upload-artifact@v7.0.0

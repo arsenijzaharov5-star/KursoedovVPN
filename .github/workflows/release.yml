@@ -70,7 +70,10 @@ jobs:
           if (-not (Test-Path "dist\v2rayN.exe")) { throw "dist\\v2rayN.exe missing after copy" }
           Move-Item dist\v2rayN.exe dist\KursoedovVPN.exe -Force
 
-          # Ensure our xray core is present
+          # Ensure our xray core is present at expected path
+          New-Item -ItemType Directory -Force -Path dist\bin\xray | Out-Null
+          Copy-Item xray.exe dist\bin\xray\xray.exe -Force
+          # keep flat copy for compatibility with old layouts
           Copy-Item xray.exe dist\xray.exe -Force
 
           $readme = @(
