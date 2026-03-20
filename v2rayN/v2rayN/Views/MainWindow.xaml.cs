@@ -920,10 +920,12 @@ public partial class MainWindow
             await ViewModel.Reload();
 
             var tunnelHealthy = false;
+            var coreRunningSeen = false;
             for (var i = 0; i < 5; i++)
             {
                 await Task.Delay(700);
                 var coreRunning = IsAnyCoreRunning();
+                coreRunningSeen = coreRunningSeen || coreRunning;
                 if (!coreRunning)
                 {
                     continue;
@@ -936,10 +938,19 @@ public partial class MainWindow
                 }
             }
 
-            if (tunnelHealthy)
+            if (tunnelHealthy || coreRunningSeen)
             {
                 AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
                 SetConnectVisual(true);
+
+                if (!tunnelHealthy)
+                {
+                    MessageBox.Show(
+                        "Core запущен, но авто-проверка туннеля не подтвердила доступ к тестовым URL. Проверь IP вручную через 2ip.ru.",
+                        "kursoedovVPN",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
             }
             else
             {
@@ -947,7 +958,7 @@ public partial class MainWindow
                 AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedClear);
                 SetConnectVisual(false);
                 MessageBox.Show(
-                    "Туннель не поднялся: core не дал рабочий прокси. Проверь ключ trojan://, SNI/порт и доступность сервера.",
+                    "Туннель не поднялся: core не запустился. Проверь ключ trojan://, SNI/порт и доступность сервера.",
                     "kursoedovVPN",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
