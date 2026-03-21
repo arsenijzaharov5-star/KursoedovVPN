@@ -76,6 +76,32 @@ public class CoreManager
             return;
         }
 
+        // Force-create runtime config if something removed it between generation and launch.
+        try
+        {
+            if (!File.Exists(fileName) && result.Data != null)
+            {
+                var dir = Path.GetDirectoryName(fileName);
+                if (!dir.IsNullOrEmpty())
+                {
+                    Directory.CreateDirectory(dir!);
+                }
+                await File.WriteAllTextAsync(fileName, result.Data.ToString() ?? string.Empty);
+            }
+
+            if (!File.Exists(fileName))
+            {
+                await UpdateFunc(true, $"Не удалось создать конфиг core: {fileName}");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logging.SaveLog(_tag, ex);
+            await UpdateFunc(true, $"Ошибка создания конфига core: {ex.Message}");
+            return;
+        }
+
         await UpdateFunc(false, $"{node.GetSummary()}");
         await UpdateFunc(false, $"{Utils.GetRuntimeInfo()}");
         await UpdateFunc(false, string.Format(ResUI.StartService, DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")));
