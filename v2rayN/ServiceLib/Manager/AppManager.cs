@@ -54,10 +54,9 @@ public sealed class AppManager
 
     public bool InitApp()
     {
-        if (Utils.HasWritePermission() == false)
-        {
-            Environment.SetEnvironmentVariable(Global.LocalAppData, "1", EnvironmentVariableTarget.Process);
-        }
+        // Force unified writable runtime location across all PCs
+        // so logs/config/temp are always under %LocalAppData%\v2rayN.
+        Environment.SetEnvironmentVariable(Global.LocalAppData, "1", EnvironmentVariableTarget.Process);
 
         Logging.Setup();
         var config = ConfigHandler.LoadConfig();
