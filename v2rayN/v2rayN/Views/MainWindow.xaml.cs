@@ -1191,13 +1191,8 @@ public partial class MainWindow
 
             AppEvents.SetDefaultServerRequested.Publish(id);
 
-            // Force sing-box for trojan profiles (single-core strategy).
+            // Keep user's selected core for the profile (do not force sing-box).
             var selected = await AppManager.Instance.GetProfileItem(id);
-            if (selected != null && selected.ConfigType == EConfigType.Trojan && selected.CoreType != ECoreType.sing_box)
-            {
-                selected.CoreType = ECoreType.sing_box;
-                await ConfigHandler.AddServer(_config, selected);
-            }
 
             // Prefer TUN when driver exists, otherwise fallback to proxy mode.
             var hasWintun = HasWintunDll();
