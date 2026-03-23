@@ -542,11 +542,6 @@ public class StatusBarViewModel : MyReactiveObject
 
     public async Task UpdateStatistics(ServerSpeedItem update)
     {
-        if (!_config.GuiItem.DisplayRealTimeSpeed)
-        {
-            return;
-        }
-
         try
         {
             if (AppManager.Instance.IsRunningCore(ECoreType.sing_box))

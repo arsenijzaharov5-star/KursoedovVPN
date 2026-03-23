@@ -262,10 +262,7 @@ public class MainWindowViewModel : MyReactiveObject
         await CoreManager.Instance.Init(_config, UpdateHandler);
         TaskManager.Instance.RegUpdateTask(_config, UpdateTaskHandler);
 
-        if (_config.GuiItem.EnableStatistics || _config.GuiItem.DisplayRealTimeSpeed)
-        {
-            await StatisticsManager.Instance.Init(_config, UpdateStatisticsHandler);
-        }
+        await StatisticsManager.Instance.Init(_config, UpdateStatisticsHandler);
         await RefreshServers();
 
         await Reload();

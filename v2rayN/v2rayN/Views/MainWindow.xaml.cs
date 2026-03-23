@@ -5,8 +5,11 @@ using System.Windows.Threading;
 using MaterialDesignThemes.Wpf;
 using ServiceLib.Handler;
 using System.Diagnostics;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
+using System.Windows;
 using v2rayN.Manager;
 
 namespace v2rayN.Views;
@@ -27,6 +30,7 @@ public partial class MainWindow
     private DateTime? _connectedAt;
     private bool _isConnectedUi;
     private bool _videoPausedForMove;
+    private readonly Dictionary<Button, (Brush? Background, Brush? BorderBrush, Brush? Foreground)> _buttonBrushBackup = new();
 
     public MainWindow()
     {
@@ -42,8 +46,7 @@ public partial class MainWindow
             }
             var span = DateTime.Now - _connectedAt.Value;
             txtConnTimer.Text = span.ToString(@"hh\:mm\:ss");
-            var sp = StatusBarViewModel.Instance.SpeedProxyDisplay;
-            txtConnSpeed.Text = $"Скорость (↓/↑): {(sp.IsNullOrEmpty() ? "0 B/s / 0 B/s" : sp)}";
+            txtConnSpeed.Text = $"Скорость (↓/↑): {BuildCurrentSpeedText()}";
         };
 
         _config = AppManager.Instance.Config;
@@ -1009,6 +1012,75 @@ public partial class MainWindow
         return added != null;
     }
 
+    private static string BuildCurrentSpeedText()
+    {
+        var speedLine = StatusBarViewModel.Instance.SpeedProxyDisplay;
+        if (speedLine.IsNullOrEmpty())
+        {
+            return "0 B/s / 0 B/s";
+        }
+
+        var match = Regex.Match(speedLine, @":\s*(.+?)↑\s*\|\s*(.+?)↓");
+        if (!match.Success)
+        {
+            return "0 B/s / 0 B/s";
+        }
+
+        var up = match.Groups[1].Value.Trim();
+        var down = match.Groups[2].Value.Trim();
+        return $"{down} / {up}";
+    }
+
+    private void PaintButtonsByConnectionState(bool connected)
+    {
+        var connectedBg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D3D3D3"));
+        var connectedBorder = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C8C8C8"));
+        var connectedFg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2F2F2F"));
+
+        foreach (var btn in FindVisualChildren<Button>(this))
+        {
+            if (!_buttonBrushBackup.ContainsKey(btn))
+            {
+                _buttonBrushBackup[btn] = (btn.Background, btn.BorderBrush, btn.Foreground);
+            }
+
+            if (connected)
+            {
+                btn.Background = connectedBg;
+                btn.BorderBrush = connectedBorder;
+                btn.Foreground = connectedFg;
+            }
+            else if (_buttonBrushBackup.TryGetValue(btn, out var original))
+            {
+                btn.Background = original.Background;
+                btn.BorderBrush = original.BorderBrush;
+                btn.Foreground = original.Foreground;
+            }
+        }
+    }
+
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+    {
+        if (parent == null)
+        {
+            yield break;
+        }
+
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T found)
+            {
+                yield return found;
+            }
+
+            foreach (var nested in FindVisualChildren<T>(child))
+            {
+                yield return nested;
+            }
+        }
+    }
+
     private void SetConnectVisual(bool connected)
     {
         _isConnectedUi = connected;
@@ -1035,6 +1107,8 @@ public partial class MainWindow
             txtConnTimer.Text = "00:00:00";
             txtConnSpeed.Text = "Скорость (↓/↑): 0 B/s / 0 B/s";
         }
+
+        PaintButtonsByConnectionState(connected);
     }
 
     private static bool IsAnyCoreRunning()
