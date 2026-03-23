@@ -59,6 +59,7 @@ public partial class MainWindow
         menuBackupAndRestore.Click += MenuBackupAndRestore_Click;
         Loaded += MainWindow_Loaded;
         LocationChanged += MainWindow_LocationChanged;
+        StateChanged += MainWindow_StateChanged;
         _moveDebounceTimer.Tick += MoveDebounceTimer_Tick;
 
         ViewModel = new MainWindowViewModel(UpdateViewHandler);
@@ -1313,11 +1314,37 @@ public partial class MainWindow
             {
                 WindowState = WindowState.Normal;
             }
+
+            try
+            {
+                if (!_videoPausedForMove && bgVideo.Source is not null)
+                {
+                    bgPoster.Opacity = 0.00;
+                    bgVideo.Opacity = 0.22;
+                    bgVideo.Play();
+                }
+            }
+            catch
+            {
+                // ignore background video errors
+            }
+
             this?.Activate();
             this?.Focus();
         }
         else
         {
+            try
+            {
+                bgVideo.Pause();
+                bgVideo.Opacity = 0.00;
+                bgPoster.Opacity = 0.18;
+            }
+            catch
+            {
+                // ignore background video errors
+            }
+
             this?.Hide();
         }
         AppManager.Instance.ShowInTaskbar = bl;
