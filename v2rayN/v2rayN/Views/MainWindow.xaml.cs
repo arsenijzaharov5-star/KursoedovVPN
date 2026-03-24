@@ -8,9 +8,8 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Media.Animation;
-using ServiceLib.Events;
 using v2rayN.Manager;
 
 namespace v2rayN.Views;
@@ -32,7 +31,6 @@ public partial class MainWindow
     private bool _isConnectedUi;
     private bool _videoPausedForMove;
     private readonly Dictionary<Button, (Brush? Background, Brush? BorderBrush, Brush? Foreground)> _buttonBrushBackup = new();
-    private string _currentSpeedText = "0 B/s / 0 B/s";
 
     public MainWindow()
     {
@@ -48,26 +46,10 @@ public partial class MainWindow
             }
             var span = DateTime.Now - _connectedAt.Value;
             txtConnTimer.Text = span.ToString(@"hh\:mm\:ss");
-            txtConnSpeed.Text = $"Скорость (↓/↑): {_currentSpeedText}";
+            txtConnSpeed.Text = $"Скорость (↓/↑): {BuildCurrentSpeedText()}";
         };
 
         _config = AppManager.Instance.Config;
-
-        AppEvents.DispatcherStatisticsRequested
-            .AsObservable()
-            .Subscribe(update =>
-            {
-                var down = Utils.HumanFy(update.ProxyDown);
-                var up = Utils.HumanFy(update.ProxyUp);
-                Dispatcher.Invoke(() =>
-                {
-                    _currentSpeedText = $"{down} / {up}";
-                    if (_isConnectedUi)
-                    {
-                        txtConnSpeed.Text = $"Скорость (↓/↑): {_currentSpeedText}";
-                    }
-                });
-            });
         ThreadPool.RegisterWaitForSingleObject(App.ProgramStarted, OnProgramStarted, null, -1, false);
 
         App.Current.SessionEnding += Current_SessionEnding;
@@ -1030,28 +1012,30 @@ public partial class MainWindow
         return added != null;
     }
 
-    private static void AnimateButtonBrushes(Button btn, Color targetBg, Color targetBorder, Color targetFg)
+    private static string BuildCurrentSpeedText()
     {
-        var duration = TimeSpan.FromMilliseconds(260);
+        var speedLine = StatusBarViewModel.Instance.SpeedProxyDisplay;
+        if (speedLine.IsNullOrEmpty())
+        {
+            return "0 B/s / 0 B/s";
+        }
 
-        var bgBrush = btn.Background as SolidColorBrush ?? new SolidColorBrush(targetBg);
-        var borderBrush = btn.BorderBrush as SolidColorBrush ?? new SolidColorBrush(targetBorder);
-        var fgBrush = btn.Foreground as SolidColorBrush ?? new SolidColorBrush(targetFg);
+        var match = Regex.Match(speedLine, @":\s*(.+?)↑\s*\|\s*(.+?)↓");
+        if (!match.Success)
+        {
+            return "0 B/s / 0 B/s";
+        }
 
-        btn.Background = bgBrush;
-        btn.BorderBrush = borderBrush;
-        btn.Foreground = fgBrush;
-
-        bgBrush.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(targetBg, duration));
-        borderBrush.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(targetBorder, duration));
-        fgBrush.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(targetFg, duration));
+        var up = match.Groups[1].Value.Trim();
+        var down = match.Groups[2].Value.Trim();
+        return $"{down} / {up}";
     }
 
     private void PaintButtonsByConnectionState(bool connected)
     {
-        var connectedBg = (Color)ColorConverter.ConvertFromString("#D3D3D3");
-        var connectedBorder = (Color)ColorConverter.ConvertFromString("#C8C8C8");
-        var connectedFg = (Color)ColorConverter.ConvertFromString("#2F2F2F");
+        var connectedBg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D3D3D3"));
+        var connectedBorder = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C8C8C8"));
+        var connectedFg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2F2F2F"));
 
         foreach (var btn in FindVisualChildren<Button>(this))
         {
@@ -1062,14 +1046,15 @@ public partial class MainWindow
 
             if (connected)
             {
-                AnimateButtonBrushes(btn, connectedBg, connectedBorder, connectedFg);
+                btn.Background = connectedBg;
+                btn.BorderBrush = connectedBorder;
+                btn.Foreground = connectedFg;
             }
             else if (_buttonBrushBackup.TryGetValue(btn, out var original))
             {
-                var targetBg = (original.Background as SolidColorBrush)?.Color ?? connectedBg;
-                var targetBorder = (original.BorderBrush as SolidColorBrush)?.Color ?? connectedBorder;
-                var targetFg = (original.Foreground as SolidColorBrush)?.Color ?? connectedFg;
-                AnimateButtonBrushes(btn, targetBg, targetBorder, targetFg);
+                btn.Background = original.Background;
+                btn.BorderBrush = original.BorderBrush;
+                btn.Foreground = original.Foreground;
             }
         }
     }
