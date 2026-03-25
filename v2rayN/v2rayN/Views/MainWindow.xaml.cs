@@ -7,6 +7,7 @@ using ServiceLib.Handler;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 using v2rayN.Manager;
 
 namespace v2rayN.Views;
@@ -27,6 +28,8 @@ public partial class MainWindow
     private DateTime? _connectedAt;
     private bool _isConnectedUi;
     private bool _videoPausedForMove;
+    private int _coreDownStreak;
+    private bool _autoRecoverInProgress;
 
     public MainWindow()
     {
@@ -38,12 +41,29 @@ public partial class MainWindow
             {
                 txtConnTimer.Text = "00:00:00";
                 txtConnSpeed.Text = "Скорость (↓/↑): 0 B/s / 0 B/s";
+                _coreDownStreak = 0;
                 return;
             }
             var span = DateTime.Now - _connectedAt.Value;
             txtConnTimer.Text = span.ToString(@"hh\:mm\:ss");
             var sp = StatusBarViewModel.Instance.SpeedProxyDisplay;
             txtConnSpeed.Text = $"Скорость (↓/↑): {(sp.IsNullOrEmpty() ? "0 B/s / 0 B/s" : sp)}";
+
+            if (_isConnectedUi)
+            {
+                if (IsAnyCoreRunning())
+                {
+                    _coreDownStreak = 0;
+                }
+                else
+                {
+                    _coreDownStreak++;
+                    if (_coreDownStreak >= 3 && !_autoRecoverInProgress)
+                    {
+                        _ = TryAutoRecoverConnectionAsync();
+                    }
+                }
+            }
         };
 
         _config = AppManager.Instance.Config;
@@ -223,6 +243,163 @@ public partial class MainWindow
         catch
         {
             // ignore background video errors
+        }
+
+        TrackMetric("app_open");
+        _ = ShowOnboardingHintIfNeededAsync();
+    }
+
+    private async Task ShowOnboardingHintIfNeededAsync()
+    {
+        try
+        {
+            var profiles = await AppManager.Instance.ProfileItems(_config.SubIndexId) ?? [];
+            if (profiles.Count > 0)
+            {
+                return;
+            }
+
+            MessageBox.Show(
+                "Добро пожаловать!
+
+1) Нажми 'Добавить ключ'
+2) Выбери профиль
+3) Нажми кнопку Пуск",
+                "kursoedovVPN",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+        catch
+        {
+            // no-op
+        }
+    }
+
+    private void TrackMetric(string evt, string? status = null, string? reason = null)
+    {
+        try
+        {
+            var dir = Path.Combine(Utils.StartupPath(), "metrics");
+            Directory.CreateDirectory(dir);
+            var file = Path.Combine(dir, "events.jsonl");
+            var payload = JsonSerializer.Serialize(new
+            {
+                ts = DateTimeOffset.UtcNow.ToString("O"),
+                evt,
+                status,
+                reason,
+                connected = _isConnectedUi,
+                tun = _config?.TunModeItem?.EnableTun,
+                profile = _config?.IndexId,
+            });
+            File.AppendAllText(file, payload + Environment.NewLine);
+        }
+        catch
+        {
+            // no-op
+        }
+    }
+
+    private async Task TryAutoRecoverConnectionAsync()
+    {
+        if (_autoRecoverInProgress)
+        {
+            return;
+        }
+
+        _autoRecoverInProgress = true;
+        try
+        {
+            txtConnStatus.Text = "Восстановление подключения...";
+            TrackMetric("connect_recover_start");
+
+            if (ViewModel == null)
+            {
+                return;
+            }
+
+            await ViewModel.Reload();
+            await Task.Delay(1200);
+
+            var healthy = await IsTunnelHealthyAsync();
+            if (!healthy && _config.TunModeItem.EnableTun)
+            {
+                _config.TunModeItem.EnableTun = false;
+                await ConfigHandler.SaveConfig(_config);
+                await ViewModel.Reload();
+                await Task.Delay(1200);
+                healthy = await IsTunnelHealthyAsync();
+            }
+
+            if (healthy || IsAnyCoreRunning())
+            {
+                AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
+                SetConnectVisual(true);
+                TrackMetric("connect_result", status: "ok");
+                txtConnStatus.Text = "Подключено";
+                TrackMetric("connect_recover_ok", status: "ok");
+            }
+            else
+            {
+                SetConnectVisual(false);
+                txtConnStatus.Text = "Не подключено";
+                TrackMetric("connect_recover_fail", status: "fail", reason: "core_down");
+            }
+        }
+        catch (Exception ex)
+        {
+            TrackMetric("connect_recover_fail", status: "fail", reason: ex.Message);
+        }
+        finally
+        {
+            _coreDownStreak = 0;
+            _autoRecoverInProgress = false;
+        }
+    }
+
+    private async Task RunQuickFixAsync()
+    {
+        try
+        {
+            TrackMetric("quick_fix_click");
+            txtConnStatus.Text = "Диагностика и восстановление...";
+
+            await CoreManager.Instance.CoreStop();
+            AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedClear);
+
+            if (!HasWintunDll() && _config.TunModeItem.EnableTun)
+            {
+                _config.TunModeItem.EnableTun = false;
+                await ConfigHandler.SaveConfig(_config);
+            }
+
+            if (ViewModel != null)
+            {
+                await ViewModel.Reload();
+            }
+
+            var healthy = await IsTunnelHealthyAsync();
+            if (healthy || IsAnyCoreRunning())
+            {
+                AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
+                SetConnectVisual(true);
+                TrackMetric("connect_result", status: "ok");
+                TrackMetric("quick_fix_result", status: "ok");
+                MessageBox.Show("Готово. Подключение восстановлено.", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                SetConnectVisual(false);
+                TrackMetric("quick_fix_result", status: "fail");
+                var diag = BuildConnectDiagnostics(coreRunningSeen: IsAnyCoreRunning(), tunnelHealthy: false);
+                MessageBox.Show("Авто-фикс не поднял туннель.\n\n" + diag, "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetConnectVisual(false);
+            TrackMetric("quick_fix_result", status: "error", reason: ex.Message);
+            MessageBox.Show("Ошибка авто-фикса: " + ex.Message, "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -648,6 +825,11 @@ public partial class MainWindow
     {
     }
 
+    private async void BtnQuickFix_Click(object sender, RoutedEventArgs e)
+    {
+        await RunQuickFixAsync();
+    }
+
     private void BtnViewLogs_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -929,6 +1111,7 @@ public partial class MainWindow
         _config.IndexId = id;
         await ConfigHandler.SaveConfig(_config);
         AppEvents.SetDefaultServerRequested.Publish(id);
+        TrackMetric("profile_select", status: "ok", reason: id);
     }
 
     private static void ApplyStrictTrojanTemplate(ProfileItem item, string link)
@@ -1012,6 +1195,7 @@ public partial class MainWindow
     private void SetConnectVisual(bool connected)
     {
         _isConnectedUi = connected;
+        TrackMetric("connect_state", status: connected ? "connected" : "disconnected");
         if (connected)
         {
             btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B3B3B"));
@@ -1176,6 +1360,7 @@ public partial class MainWindow
     {
         try
         {
+            TrackMetric("connect_click");
             if (_isConnectedUi)
             {
                 await CoreManager.Instance.CoreStop();
@@ -1283,6 +1468,7 @@ public partial class MainWindow
             {
                 AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
                 SetConnectVisual(true);
+                TrackMetric("connect_result", status: "ok");
 
                 if (!hasWintun)
                 {
@@ -1306,6 +1492,7 @@ public partial class MainWindow
                 await CoreManager.Instance.CoreStop();
                 AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedClear);
                 SetConnectVisual(false);
+                TrackMetric("connect_result", status: "fail", reason: "tunnel_not_up");
                 var diag = BuildConnectDiagnostics(coreRunningSeen, tunnelHealthy);
                 MessageBox.Show(
                     "Туннель не поднялся. Проверь ключ trojan://, SNI/порт, доступность сервера и наличие wintun.dll.\n\n" + diag,
@@ -1317,6 +1504,7 @@ public partial class MainWindow
         catch (Exception ex)
         {
             SetConnectVisual(false);
+            TrackMetric("connect_result", status: "error", reason: ex.Message);
             var diag = BuildConnectDiagnostics(coreRunningSeen: IsAnyCoreRunning(), tunnelHealthy: false);
             var reason = ExplainException(ex);
             MessageBox.Show($"Ошибка подключения: {reason}\n\n{diag}", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Error);

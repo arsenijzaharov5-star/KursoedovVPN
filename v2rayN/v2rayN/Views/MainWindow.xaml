@@ -393,7 +393,10 @@
                                 </Button>
                                 <TextBlock x:Name="txtConnStatus" Text="Не подключено" Foreground="#5C5C5C" HorizontalAlignment="Center" Margin="0,12,0,0" />
                                 <TextBlock x:Name="txtConnSpeed" Text="Скорость (↓/↑): 0 B/s / 0 B/s" Foreground="#3E3E3E" FontSize="14" FontWeight="SemiBold" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,10,0,0" />
-                                <Button x:Name="btnViewLogs" Content="Показать логи" Width="170" Height="34" Margin="0,14,0,0" HorizontalAlignment="Center" Style="{StaticResource DefButton}" Click="BtnViewLogs_Click" />
+                                <WrapPanel HorizontalAlignment="Center" Margin="0,14,0,0">
+                                    <Button x:Name="btnViewLogs" Content="Показать логи" Width="170" Height="34" Margin="0,0,8,0" Style="{StaticResource DefButton}" Click="BtnViewLogs_Click" />
+                                    <Button x:Name="btnQuickFix" Content="Починить" Width="130" Height="34" Style="{StaticResource DefButton}" Click="BtnQuickFix_Click" />
+                                </WrapPanel>
                             </StackPanel>
                         </Border>
 
