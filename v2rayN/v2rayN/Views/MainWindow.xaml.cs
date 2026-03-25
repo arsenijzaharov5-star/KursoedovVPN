@@ -1195,17 +1195,9 @@ public partial class MainWindow
             // Keep user's selected core for the profile (do not force sing-box).
             var selected = await AppManager.Instance.GetProfileItem(id);
 
-            // Prefer TUN when driver exists, otherwise fallback to proxy mode.
+            // Keep user's TUN preference. We only force-disable when wintun is absent.
             var hasWintun = HasWintunDll();
-            if (hasWintun)
-            {
-                if (!_config.TunModeItem.EnableTun)
-                {
-                    _config.TunModeItem.EnableTun = true;
-                    await ConfigHandler.SaveConfig(_config);
-                }
-            }
-            else if (_config.TunModeItem.EnableTun)
+            if (!hasWintun && _config.TunModeItem.EnableTun)
             {
                 _config.TunModeItem.EnableTun = false;
                 await ConfigHandler.SaveConfig(_config);
@@ -1249,7 +1241,40 @@ public partial class MainWindow
                 else if (TryStartXrayFallback())
                 {
                     await Task.Delay(900);
+                    socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
                     if (socksPort > 0 && await IsPortOpenAsync(socksPort))
+                    {
+                        tunnelHealthy = true;
+                        coreRunningSeen = true;
+                    }
+                }
+
+                // If TUN mode is enabled and health-check still fails, retry once in proxy mode.
+                if (!tunnelHealthy && _config.TunModeItem.EnableTun)
+                {
+                    _config.TunModeItem.EnableTun = false;
+                    await ConfigHandler.SaveConfig(_config);
+                    await ViewModel.Reload();
+
+                    for (var i = 0; i < 4; i++)
+                    {
+                        await Task.Delay(600);
+                        var coreRunning = IsAnyCoreRunning();
+                        coreRunningSeen = coreRunningSeen || coreRunning;
+                        if (!coreRunning)
+                        {
+                            continue;
+                        }
+
+                        tunnelHealthy = await IsTunnelHealthyAsync();
+                        if (tunnelHealthy)
+                        {
+                            break;
+                        }
+                    }
+
+                    socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+                    if (!tunnelHealthy && socksPort > 0 && await IsPortOpenAsync(socksPort))
                     {
                         tunnelHealthy = true;
                         coreRunningSeen = true;
