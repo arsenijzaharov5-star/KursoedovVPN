@@ -1192,9 +1192,6 @@ public partial class MainWindow
 
             AppEvents.SetDefaultServerRequested.Publish(id);
 
-            // Keep user's selected core for the profile (do not force sing-box).
-            var selected = await AppManager.Instance.GetProfileItem(id);
-
             // Keep user's TUN preference. We only force-disable when wintun is absent.
             var hasWintun = HasWintunDll();
             if (!hasWintun && _config.TunModeItem.EnableTun)
