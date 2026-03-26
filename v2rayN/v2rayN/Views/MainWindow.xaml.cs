@@ -454,13 +454,50 @@ public partial class MainWindow
 
     private void MainWindow_LocationChanged(object? sender, EventArgs e)
     {
-        // Keep video playing while window moves to avoid visible stutter.
-        // No-op by design.
+        try
+        {
+            if (bgVideo.Source is null)
+            {
+                return;
+            }
+
+            if (!_videoPausedForMove)
+            {
+                _videoPausedForMove = true;
+                bgVideo.Pause();
+                bgVideo.Opacity = 0.00;
+                bgPoster.Opacity = 0.18;
+            }
+
+            _moveDebounceTimer.Stop();
+            _moveDebounceTimer.Start();
+        }
+        catch
+        {
+            // ignore background video errors
+        }
     }
 
     private void MoveDebounceTimer_Tick(object? sender, EventArgs e)
     {
         _moveDebounceTimer.Stop();
+
+        try
+        {
+            if (!_videoPausedForMove)
+            {
+                return;
+            }
+
+            _videoPausedForMove = false;
+            bgVideo.Opacity = 0.22;
+            bgPoster.Opacity = 0.00;
+            bgVideo.Play();
+        }
+        catch
+        {
+            // ignore background video errors
+        }
     }
 
     private void MainWindow_StateChanged(object? sender, EventArgs e)
