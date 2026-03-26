@@ -159,14 +159,14 @@
                 </Style.Triggers>
             </Style>
             <Style x:Key="NavSettingsButton" TargetType="{x:Type Button}">
-                <Setter Property="Height" Value="44" />
-                <Setter Property="Padding" Value="16,0,52,0" />
-                <Setter Property="FontSize" Value="16" />
-                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Height" Value="42" />
+                <Setter Property="Padding" Value="14,0,48,0" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="FontWeight" Value="Medium" />
                 <Setter Property="FontFamily" Value="Segoe UI" />
-                <Setter Property="Foreground" Value="#2F3136" />
-                <Setter Property="Background" Value="#D4D6DB" />
-                <Setter Property="BorderBrush" Value="#BFC2C8" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Background" Value="#2F3238" />
+                <Setter Property="BorderBrush" Value="#272A30" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="Template">
                     <Setter.Value>
@@ -189,7 +189,7 @@
                                         Margin="0,0,5,0"
                                         VerticalAlignment="Center"
                                         CornerRadius="17"
-                                        Background="#3A3D44">
+                                        Background="#3A3E45">
                                     <materialDesign:PackIcon Kind="CogOutline"
                                                              Width="18"
                                                              Height="18"
@@ -200,11 +200,11 @@
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#CBCDD3" />
+                                    <Setter TargetName="Bg" Property="Background" Value="#383C43" />
                                     <Setter TargetName="IconWrap" Property="Background" Value="#31343A" />
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#BEC1C8" />
+                                    <Setter TargetName="Bg" Property="Background" Value="#2A2E34" />
                                     <Setter TargetName="IconWrap" Property="Background" Value="#2A2D33" />
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
@@ -221,11 +221,11 @@
                 <Setter Property="Height" Value="36" />
                 <Setter Property="Padding" Value="16,0" />
                 <Setter Property="FontSize" Value="14" />
-                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontWeight" Value="Medium" />
                 <Setter Property="FontFamily" Value="Segoe UI" />
-                <Setter Property="Foreground" Value="#2E3239" />
-                <Setter Property="Background" Value="#D8DCE3" />
-                <Setter Property="BorderBrush" Value="#C0C6CF" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Background" Value="#2F3238" />
+                <Setter Property="BorderBrush" Value="#272A30" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="Template">
                     <Setter.Value>
@@ -235,10 +235,10 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#CDD3DC" />
+                                    <Setter TargetName="Bg" Property="Background" Value="#383C43" />
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#C2C9D3" />
+                                    <Setter TargetName="Bg" Property="Background" Value="#2A2E34" />
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter TargetName="Bg" Property="Opacity" Value="0.55" />

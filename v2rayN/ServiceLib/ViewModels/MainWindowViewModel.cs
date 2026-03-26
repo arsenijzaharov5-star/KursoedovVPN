@@ -305,10 +305,6 @@ public class MainWindowViewModel : MyReactiveObject
 
     private async Task UpdateStatisticsHandler(ServerSpeedItem update)
     {
-        if (!AppManager.Instance.ShowInTaskbar)
-        {
-            return;
-        }
         AppEvents.DispatcherStatisticsRequested.Publish(update);
         await Task.CompletedTask;
     }
