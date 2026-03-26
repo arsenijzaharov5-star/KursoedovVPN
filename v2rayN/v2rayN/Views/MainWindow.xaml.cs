@@ -6,6 +6,7 @@ using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using MaterialDesignThemes.Wpf;
 using ServiceLib.Handler;
+using ServiceLib.Events;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -32,6 +33,7 @@ public partial class MainWindow
     private bool _videoPausedForMove;
     private int _coreDownStreak;
     private bool _autoRecoverInProgress;
+    private string _liveSpeedText = "0 B/s / 0 B/s";
 
     public MainWindow()
     {
@@ -48,8 +50,7 @@ public partial class MainWindow
             }
             var span = DateTime.Now - _connectedAt.Value;
             txtConnTimer.Text = span.ToString(@"hh\:mm\:ss");
-            var sp = StatusBarViewModel.Instance.SpeedProxyDisplay;
-            txtConnSpeed.Text = $"Скорость (↓/↑): {(sp.IsNullOrEmpty() ? "0 B/s / 0 B/s" : sp)}";
+            txtConnSpeed.Text = $"Скорость (↓/↑): {_liveSpeedText}";
 
             if (_isConnectedUi)
             {
@@ -69,6 +70,19 @@ public partial class MainWindow
         };
 
         _config = AppManager.Instance.Config;
+
+        AppEvents.DispatcherStatisticsRequested
+            .AsObservable()
+            .ObserveOn(RxSchedulers.MainThreadScheduler)
+            .Subscribe(update =>
+            {
+                _liveSpeedText = $"{Utils.HumanFy(update.ProxyDown)} / {Utils.HumanFy(update.ProxyUp)}";
+                if (_isConnectedUi)
+                {
+                    txtConnSpeed.Text = $"Скорость (↓/↑): {_liveSpeedText}";
+                }
+            });
+
         ThreadPool.RegisterWaitForSingleObject(App.ProgramStarted, OnProgramStarted, null, -1, false);
 
         App.Current.SessionEnding += Current_SessionEnding;
@@ -1440,6 +1454,12 @@ public partial class MainWindow
             if (!hasWintun && _config.TunModeItem.EnableTun)
             {
                 _config.TunModeItem.EnableTun = false;
+                await ConfigHandler.SaveConfig(_config);
+            }
+
+            if (!_config.GuiItem.DisplayRealTimeSpeed)
+            {
+                _config.GuiItem.DisplayRealTimeSpeed = true;
                 await ConfigHandler.SaveConfig(_config);
             }
 
