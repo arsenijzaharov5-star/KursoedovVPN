@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using MaterialDesignThemes.Wpf;
 using ServiceLib.Handler;
@@ -1201,6 +1202,32 @@ public partial class MainWindow
         }
     }
 
+    private void AnimateMainButtonMicroInteraction(bool connected)
+    {
+        if (btnConnectMain.RenderTransform is not ScaleTransform scale)
+        {
+            return;
+        }
+
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        var pulseTo = connected ? 1.04 : 1.02;
+        var d1 = TimeSpan.FromMilliseconds(120);
+        var d2 = TimeSpan.FromMilliseconds(140);
+
+        scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(pulseTo, d1) { EasingFunction = ease });
+        scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(pulseTo, d1) { EasingFunction = ease });
+
+        var back = new DoubleAnimation(1.0, d2) { BeginTime = d1, EasingFunction = ease };
+        scale.BeginAnimation(ScaleTransform.ScaleXProperty, back);
+        scale.BeginAnimation(ScaleTransform.ScaleYProperty, back);
+
+        if (btnConnectMain.Effect is DropShadowEffect shadow)
+        {
+            shadow.BeginAnimation(DropShadowEffect.OpacityProperty, new DoubleAnimation(connected ? 0.34 : 0.24, d1));
+            shadow.BeginAnimation(DropShadowEffect.OpacityProperty, new DoubleAnimation(connected ? 0.28 : 0.24, d2) { BeginTime = d1 });
+        }
+    }
+
     private void SetConnectVisual(bool connected)
     {
         _isConnectedUi = connected;
@@ -1232,6 +1259,8 @@ public partial class MainWindow
             txtConnTimer.Text = "00:00:00";
             txtConnSpeed.Text = "Скорость (↓/↑): 0 B/s / 0 B/s";
         }
+
+        AnimateMainButtonMicroInteraction(connected);
     }
 
     private static bool IsAnyCoreRunning()

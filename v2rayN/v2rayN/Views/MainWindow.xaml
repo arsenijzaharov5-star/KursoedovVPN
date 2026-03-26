@@ -382,7 +382,13 @@
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="Время подключения" FontSize="16" Foreground="#5C5C5C" HorizontalAlignment="Center" />
                                 <TextBlock x:Name="txtConnTimer" Text="00:00:00" FontSize="42" FontWeight="SemiBold" Foreground="#111111" HorizontalAlignment="Center" Margin="0,8,0,16" />
-                                <Button x:Name="btnConnectMain" Width="108" Height="108" HorizontalAlignment="Center" Click="BtnConnectMain_Click" Background="#D5D8DE" Foreground="#4C515A" BorderBrush="#BFC4CC" FontSize="34">
+                                <Button x:Name="btnConnectMain" Width="108" Height="108" HorizontalAlignment="Center" Click="BtnConnectMain_Click" Background="#D5D8DE" Foreground="#4C515A" BorderBrush="#BFC4CC" FontSize="34" RenderTransformOrigin="0.5,0.5">
+                                    <Button.RenderTransform>
+                                        <ScaleTransform ScaleX="1" ScaleY="1" />
+                                    </Button.RenderTransform>
+                                    <Button.Effect>
+                                        <DropShadowEffect BlurRadius="14" ShadowDepth="2" Color="#7E8A98" Opacity="0.24" />
+                                    </Button.Effect>
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Grid>
