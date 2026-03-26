@@ -364,12 +364,23 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                                <Button x:Name="btnDeleteProfile" Width="42" Height="42" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Style="{StaticResource DefButton}" Click="BtnDeleteProfile_Click" ToolTip="Удалить выбранный профиль">
+                                <Button x:Name="btnDeleteProfile" Width="44" Height="44" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Click="BtnDeleteProfile_Click" ToolTip="Удалить выбранный профиль" Background="#3A3D44" BorderBrush="#2E3137" Foreground="White">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border CornerRadius="21" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
-                                                <materialDesign:PackIcon Kind="DeleteOutline" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
+                                            <Border x:Name="Bg" CornerRadius="22" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.2">
+                                                <materialDesign:PackIcon Kind="CloseThick" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
                                             </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bg" Property="Background" Value="#32353B" />
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="Bg" Property="Background" Value="#2A2D33" />
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Bg" Property="Opacity" Value="0.6" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
