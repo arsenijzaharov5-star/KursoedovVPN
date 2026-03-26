@@ -261,11 +261,7 @@ public partial class MainWindow
             }
 
             MessageBox.Show(
-                "Добро пожаловать!
-
-1) Нажми 'Добавить ключ'
-2) Выбери профиль
-3) Нажми кнопку Пуск",
+                "Добро пожаловать!\n\n1) Нажми 'Добавить ключ'\n2) Выбери профиль\n3) Нажми кнопку Пуск",
                 "kursoedovVPN",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
