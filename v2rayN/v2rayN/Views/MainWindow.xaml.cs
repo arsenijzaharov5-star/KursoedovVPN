@@ -76,7 +76,11 @@ public partial class MainWindow
             .ObserveOn(RxSchedulers.MainThreadScheduler)
             .Subscribe(update =>
             {
-                _liveSpeedText = $"{Utils.HumanFy(update.ProxyDown)} / {Utils.HumanFy(update.ProxyUp)}";
+                if (update.ProxyDown > 0 || update.ProxyUp > 0)
+                {
+                    _liveSpeedText = $"{Utils.HumanFy(update.ProxyDown)} / {Utils.HumanFy(update.ProxyUp)}";
+                }
+
                 if (_isConnectedUi)
                 {
                     txtConnSpeed.Text = $"Скорость (↓/↑): {_liveSpeedText}";
@@ -1264,9 +1268,9 @@ public partial class MainWindow
         TrackMetric("connect_state", status: connected ? "connected" : "disconnected");
         if (connected)
         {
-            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C8CDD5"));
-            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B5BBC5"));
-            btnConnectMain.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B5058"));
+            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3A3E45"));
+            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2E34"));
+            btnConnectMain.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F1F4FA"));
             SetMainConnectIcon(PackIconKind.Pause, animated: true);
             txtConnStatus.Text = "Подключено";
             txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2D323A"));
@@ -1278,10 +1282,11 @@ public partial class MainWindow
         }
         else
         {
-            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D5D8DE"));
-            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BFC4CC"));
-            btnConnectMain.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5A606A"));
+            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2F3238"));
+            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#272A30"));
+            btnConnectMain.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E7EBF2"));
             SetMainConnectIcon(PackIconKind.Play, animated: true);
+            _liveSpeedText = "0 B/s / 0 B/s";
             txtConnStatus.Text = "Не подключено";
             txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B6B6B"));
             _connectedAt = null;

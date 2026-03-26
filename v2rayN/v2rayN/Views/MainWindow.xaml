@@ -358,7 +358,7 @@
                                 <Button x:Name="btnAddKey" Width="42" Height="42" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Click="BtnAddKey_Click" ToolTip="Добавить ключ" Background="#2F3238" BorderBrush="#272A30" Foreground="White">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bg" CornerRadius="22" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.2">
+                                            <Border x:Name="Bg" CornerRadius="21" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
                                                 <materialDesign:PackIcon Kind="PlusThick" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -378,7 +378,7 @@
                                 <Button x:Name="btnDeleteProfile" Width="42" Height="42" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Click="BtnDeleteProfile_Click" ToolTip="Удалить выбранный профиль" Background="#2F3238" BorderBrush="#272A30" Foreground="White">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bg" CornerRadius="22" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.2">
+                                            <Border x:Name="Bg" CornerRadius="21" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
                                                 <materialDesign:PackIcon Kind="DeleteOutline" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -404,27 +404,27 @@
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="Время подключения" FontSize="16" FontWeight="SemiBold" FontFamily="Segoe UI" Foreground="#4F5560" HorizontalAlignment="Center" />
                                 <TextBlock x:Name="txtConnTimer" Text="00:00:00" FontSize="42" FontWeight="SemiBold" FontFamily="Segoe UI" Foreground="#111111" HorizontalAlignment="Center" Margin="0,8,0,16" />
-                                <Button x:Name="btnConnectMain" Width="108" Height="108" HorizontalAlignment="Center" Click="BtnConnectMain_Click" FocusVisualStyle="{x:Null}" Background="#D5D8DE" Foreground="#4C515A" BorderBrush="#BFC4CC" FontSize="34" RenderTransformOrigin="0.5,0.5">
+                                <Button x:Name="btnConnectMain" Width="108" Height="108" HorizontalAlignment="Center" Click="BtnConnectMain_Click" FocusVisualStyle="{x:Null}" Background="#2F3238" Foreground="#E7EBF2" BorderBrush="#272A30" FontSize="34" RenderTransformOrigin="0.5,0.5">
                                     <Button.RenderTransform>
                                         <ScaleTransform ScaleX="1" ScaleY="1" />
                                     </Button.RenderTransform>
                                     <Button.Effect>
-                                        <DropShadowEffect BlurRadius="14" ShadowDepth="2" Color="#7E8A98" Opacity="0.24" />
+                                        <DropShadowEffect BlurRadius="14" ShadowDepth="2" Color="#0D0E10" Opacity="0.32" />
                                     </Button.Effect>
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Grid>
-                                                <Border x:Name="Outer" CornerRadius="54" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.2" />
-                                                <Border x:Name="Inner" Width="86" Height="86" CornerRadius="43" Background="#ECEEF2" BorderBrush="#D5D9E0" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                <Border x:Name="Outer" CornerRadius="54" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" />
+                                                <Border x:Name="Inner" Width="86" Height="86" CornerRadius="43" Background="#3A3E45" BorderBrush="#2A2E34" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                 <materialDesign:PackIcon x:Name="iconMainAction" Kind="Play" Width="42" Height="42" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
                                             </Grid>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Outer" Property="Background" Value="#CCD1D9" />
+                                                    <Setter TargetName="Outer" Property="Background" Value="#383C43" />
                                                 </Trigger>
                                                 <Trigger Property="IsPressed" Value="True">
-                                                    <Setter TargetName="Outer" Property="Background" Value="#BCC2CB" />
-                                                    <Setter TargetName="Inner" Property="Background" Value="#E2E6EC" />
+                                                    <Setter TargetName="Outer" Property="Background" Value="#2A2E34" />
+                                                    <Setter TargetName="Inner" Property="Background" Value="#343841" />
                                                 </Trigger>
                                                 <Trigger Property="IsEnabled" Value="False">
                                                     <Setter TargetName="Outer" Property="Opacity" Value="0.65" />
