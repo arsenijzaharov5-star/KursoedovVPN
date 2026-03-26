@@ -158,6 +158,63 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
+            <Style x:Key="NavSettingsButton" TargetType="{x:Type Button}">
+                <Setter Property="Height" Value="54" />
+                <Setter Property="Padding" Value="20,0,64,0" />
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="Foreground" Value="#2F3136" />
+                <Setter Property="Background" Value="#D4D6DB" />
+                <Setter Property="BorderBrush" Value="#BFC2C8" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Grid>
+                                <Border x:Name="Bg"
+                                        CornerRadius="27"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      RecognizesAccessKey="True" />
+                                </Border>
+                                <Border x:Name="IconWrap"
+                                        Width="44"
+                                        Height="44"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,0,6,0"
+                                        VerticalAlignment="Center"
+                                        CornerRadius="22"
+                                        Background="#3A3D44">
+                                    <materialDesign:PackIcon Kind="CogOutline"
+                                                             Width="24"
+                                                             Height="24"
+                                                             Foreground="White"
+                                                             HorizontalAlignment="Center"
+                                                             VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#CBCDD3" />
+                                    <Setter TargetName="IconWrap" Property="Background" Value="#31343A" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#BEC1C8" />
+                                    <Setter TargetName="IconWrap" Property="Background" Value="#2A2D33" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.6" />
+                                    <Setter TargetName="IconWrap" Property="Opacity" Value="0.6" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <Style
                 x:Key="DefContextMenu"
                 BasedOn="{StaticResource MaterialDesignContextMenu}"
