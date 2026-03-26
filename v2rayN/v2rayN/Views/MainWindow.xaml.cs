@@ -1006,6 +1006,12 @@ public partial class MainWindow
                     return;
                 }
 
+                if (!IsOwnVpnKey(text))
+                {
+                    MessageBox.Show("Можно добавлять только ключи kursoedovVPN (trojan://... c доменом *.kursoedov.xyz)", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 if (ViewModel != null)
                 {
                     var ok = await ImportLinkAndRefreshAsync(text);
@@ -1030,6 +1036,12 @@ public partial class MainWindow
                 var input = PromptForKey();
                 if (input.IsNullOrEmpty())
                 {
+                    return;
+                }
+
+                if (!IsOwnVpnKey(input))
+                {
+                    MessageBox.Show("Можно добавлять только ключи kursoedovVPN (trojan://... c доменом *.kursoedov.xyz)", "kursoedovVPN", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -1129,6 +1141,43 @@ public partial class MainWindow
         TrackMetric("profile_select", status: "ok", reason: id);
     }
 
+
+    private static bool IsTrustedOwnHost(string? host)
+    {
+        if (host.IsNullOrEmpty())
+        {
+            return false;
+        }
+
+        var h = host!.Trim().ToLowerInvariant();
+        return h == "vpn.kursoedov.xyz" || h.EndsWith(".kursoedov.xyz");
+    }
+
+    private static bool IsOwnVpnKey(string rawLink)
+    {
+        var text = rawLink?.Trim() ?? string.Empty;
+        if (text.IsNullOrEmpty())
+        {
+            return false;
+        }
+
+        var uri = Utils.TryUri(text);
+        if (uri == null)
+        {
+            return false;
+        }
+
+        if (!string.Equals(uri.Scheme, "trojan", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var query = Utils.ParseQueryString(uri.Query);
+        var sni = Utils.UrlDecode(query?["sni"] ?? string.Empty);
+
+        return IsTrustedOwnHost(uri.IdnHost) || IsTrustedOwnHost(sni);
+    }
+
     private static void ApplyStrictTrojanTemplate(ProfileItem item, string link)
     {
         if (item.ConfigType != EConfigType.Trojan)
@@ -1175,6 +1224,11 @@ public partial class MainWindow
 
     private async Task<bool> ImportLinkAndRefreshAsync(string link)
     {
+        if (!IsOwnVpnKey(link))
+        {
+            return false;
+        }
+
         var beforeProfiles = await AppManager.Instance.ProfileItems(_config.SubIndexId) ?? [];
         var beforeIds = beforeProfiles.Select(x => x.IndexId).Where(x => x.IsNotEmpty()).ToHashSet();
 
