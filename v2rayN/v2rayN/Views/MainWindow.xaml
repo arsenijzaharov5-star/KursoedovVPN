@@ -355,12 +355,23 @@
 
                         <Border Grid.Row="0" Background="#DFFFFFFF" BorderBrush="#D9D9D9" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,14" Panel.ZIndex="1">
                             <DockPanel>
-                                <Button x:Name="btnAddKey" Width="42" Height="42" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Style="{StaticResource DefButton}" FontSize="24" FontWeight="Bold" FontFamily="Segoe UI" Click="BtnAddKey_Click" ToolTip="Добавить ключ">
+                                <Button x:Name="btnAddKey" Width="44" Height="44" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Click="BtnAddKey_Click" ToolTip="Добавить ключ" Background="#000000" BorderBrush="#000000" Foreground="White">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border CornerRadius="21" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
-                                                <TextBlock Text="+" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" />
+                                            <Border x:Name="Bg" CornerRadius="22" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.2">
+                                                <materialDesign:PackIcon Kind="PlusThick" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
                                             </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bg" Property="Background" Value="#111111" />
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="Bg" Property="Background" Value="#1A1A1A" />
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Bg" Property="Opacity" Value="0.6" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
