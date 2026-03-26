@@ -375,18 +375,18 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                                <Button x:Name="btnDeleteProfile" Width="44" Height="44" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Click="BtnDeleteProfile_Click" ToolTip="Удалить выбранный профиль" Background="#3A3D44" BorderBrush="#2E3137" Foreground="White">
+                                <Button x:Name="btnDeleteProfile" Width="44" Height="44" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Click="BtnDeleteProfile_Click" ToolTip="Удалить выбранный профиль" Background="#000000" BorderBrush="#000000" Foreground="White">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border x:Name="Bg" CornerRadius="22" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.2">
-                                                <materialDesign:PackIcon Kind="CloseThick" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
+                                                <materialDesign:PackIcon Kind="DeleteOutline" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Bg" Property="Background" Value="#32353B" />
+                                                    <Setter TargetName="Bg" Property="Background" Value="#111111" />
                                                 </Trigger>
                                                 <Trigger Property="IsPressed" Value="True">
-                                                    <Setter TargetName="Bg" Property="Background" Value="#2A2D33" />
+                                                    <Setter TargetName="Bg" Property="Background" Value="#1A1A1A" />
                                                 </Trigger>
                                                 <Trigger Property="IsEnabled" Value="False">
                                                     <Setter TargetName="Bg" Property="Opacity" Value="0.6" />
