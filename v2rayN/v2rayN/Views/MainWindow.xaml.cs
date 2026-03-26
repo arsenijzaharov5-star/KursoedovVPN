@@ -1192,16 +1192,27 @@ public partial class MainWindow
         return added != null;
     }
 
+    private void SetMainConnectIcon(PackIconKind kind)
+    {
+        btnConnectMain.ApplyTemplate();
+        if (btnConnectMain.Template.FindName("iconMainAction", btnConnectMain) is PackIcon icon)
+        {
+            icon.Kind = kind;
+        }
+    }
+
     private void SetConnectVisual(bool connected)
     {
         _isConnectedUi = connected;
         TrackMetric("connect_state", status: connected ? "connected" : "disconnected");
         if (connected)
         {
-            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B3B3B"));
-            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B3B3B"));
+            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C8CDD5"));
+            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B5BBC5"));
+            btnConnectMain.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B5058"));
+            SetMainConnectIcon(PackIconKind.Pause);
             txtConnStatus.Text = "Подключено";
-            txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#222222"));
+            txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2D323A"));
             if (_connectedAt == null)
             {
                 _connectedAt = DateTime.Now;
@@ -1210,8 +1221,10 @@ public partial class MainWindow
         }
         else
         {
-            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2F2F2F"));
-            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2F2F2F"));
+            btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D5D8DE"));
+            btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BFC4CC"));
+            btnConnectMain.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5A606A"));
+            SetMainConnectIcon(PackIconKind.Play);
             txtConnStatus.Text = "Не подключено";
             txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B6B6B"));
             _connectedAt = null;

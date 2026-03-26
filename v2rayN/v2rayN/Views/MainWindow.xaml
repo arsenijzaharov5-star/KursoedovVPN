@@ -382,12 +382,27 @@
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="Время подключения" FontSize="16" Foreground="#5C5C5C" HorizontalAlignment="Center" />
                                 <TextBlock x:Name="txtConnTimer" Text="00:00:00" FontSize="42" FontWeight="SemiBold" Foreground="#111111" HorizontalAlignment="Center" Margin="0,8,0,16" />
-                                <Button x:Name="btnConnectMain" Width="104" Height="104" HorizontalAlignment="Center" Click="BtnConnectMain_Click" Background="#1C1C1C" Foreground="White" BorderBrush="#1C1C1C" FontSize="34">
+                                <Button x:Name="btnConnectMain" Width="108" Height="108" HorizontalAlignment="Center" Click="BtnConnectMain_Click" Background="#D5D8DE" Foreground="#4C515A" BorderBrush="#BFC4CC" FontSize="34">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border CornerRadius="48" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
-                                                <materialDesign:PackIcon Kind="Power" Width="44" Height="44" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
-                                            </Border>
+                                            <Grid>
+                                                <Border x:Name="Outer" CornerRadius="54" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.2" />
+                                                <Border x:Name="Inner" Width="86" Height="86" CornerRadius="43" Background="#ECEEF2" BorderBrush="#D5D9E0" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                <materialDesign:PackIcon x:Name="iconMainAction" Kind="Play" Width="42" Height="42" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Outer" Property="Background" Value="#CCD1D9" />
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="Outer" Property="Background" Value="#BCC2CB" />
+                                                    <Setter TargetName="Inner" Property="Background" Value="#E2E6EC" />
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Outer" Property="Opacity" Value="0.65" />
+                                                    <Setter TargetName="Inner" Property="Opacity" Value="0.65" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
