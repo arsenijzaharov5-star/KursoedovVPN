@@ -1190,13 +1190,28 @@ public partial class MainWindow
         return added != null;
     }
 
-    private void SetMainConnectIcon(PackIconKind kind)
+    private void SetMainConnectIcon(PackIconKind kind, bool animated = true)
     {
         btnConnectMain.ApplyTemplate();
-        if (btnConnectMain.Template.FindName("iconMainAction", btnConnectMain) is PackIcon icon)
+        if (btnConnectMain.Template.FindName("iconMainAction", btnConnectMain) is not PackIcon icon)
+        {
+            return;
+        }
+
+        if (!animated)
         {
             icon.Kind = kind;
+            icon.Opacity = 1;
+            return;
         }
+
+        var fadeOut = new DoubleAnimation(0.0, TimeSpan.FromMilliseconds(90));
+        fadeOut.Completed += (_, _) =>
+        {
+            icon.Kind = kind;
+            icon.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(1.0, TimeSpan.FromMilliseconds(110)));
+        };
+        icon.BeginAnimation(UIElement.OpacityProperty, fadeOut);
     }
 
     private void AnimateMainButtonMicroInteraction(bool connected)
@@ -1206,22 +1221,26 @@ public partial class MainWindow
             return;
         }
 
+        var pulse = connected ? 1.04 : 1.02;
         var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-        var pulseTo = connected ? 1.04 : 1.02;
-        var d1 = TimeSpan.FromMilliseconds(120);
-        var d2 = TimeSpan.FromMilliseconds(140);
 
-        scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(pulseTo, d1) { EasingFunction = ease });
-        scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(pulseTo, d1) { EasingFunction = ease });
+        var kx = new DoubleAnimationUsingKeyFrames();
+        kx.KeyFrames.Add(new EasingDoubleKeyFrame(pulse, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(120)), ease));
+        kx.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(260)), ease));
 
-        var back = new DoubleAnimation(1.0, d2) { BeginTime = d1, EasingFunction = ease };
-        scale.BeginAnimation(ScaleTransform.ScaleXProperty, back);
-        scale.BeginAnimation(ScaleTransform.ScaleYProperty, back);
+        var ky = new DoubleAnimationUsingKeyFrames();
+        ky.KeyFrames.Add(new EasingDoubleKeyFrame(pulse, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(120)), ease));
+        ky.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(260)), ease));
+
+        scale.BeginAnimation(ScaleTransform.ScaleXProperty, kx);
+        scale.BeginAnimation(ScaleTransform.ScaleYProperty, ky);
 
         if (btnConnectMain.Effect is DropShadowEffect shadow)
         {
-            shadow.BeginAnimation(DropShadowEffect.OpacityProperty, new DoubleAnimation(connected ? 0.34 : 0.24, d1));
-            shadow.BeginAnimation(DropShadowEffect.OpacityProperty, new DoubleAnimation(connected ? 0.28 : 0.24, d2) { BeginTime = d1 });
+            var ks = new DoubleAnimationUsingKeyFrames();
+            ks.KeyFrames.Add(new EasingDoubleKeyFrame(connected ? 0.34 : 0.26, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(120)), ease));
+            ks.KeyFrames.Add(new EasingDoubleKeyFrame(connected ? 0.28 : 0.24, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(260)), ease));
+            shadow.BeginAnimation(DropShadowEffect.OpacityProperty, ks);
         }
     }
 
@@ -1234,7 +1253,7 @@ public partial class MainWindow
             btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C8CDD5"));
             btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B5BBC5"));
             btnConnectMain.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B5058"));
-            SetMainConnectIcon(PackIconKind.Pause);
+            SetMainConnectIcon(PackIconKind.Pause, animated: true);
             txtConnStatus.Text = "Подключено";
             txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2D323A"));
             if (_connectedAt == null)
@@ -1248,7 +1267,7 @@ public partial class MainWindow
             btnConnectMain.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D5D8DE"));
             btnConnectMain.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BFC4CC"));
             btnConnectMain.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5A606A"));
-            SetMainConnectIcon(PackIconKind.Play);
+            SetMainConnectIcon(PackIconKind.Play, animated: true);
             txtConnStatus.Text = "Не подключено";
             txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B6B6B"));
             _connectedAt = null;
