@@ -231,10 +231,9 @@ public partial class MainWindow
             WindowState = WindowState.Minimized;
         }
 
-        if (!_config.GuiItem.EnableHWA)
-        {
-            RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
-        }
+        // Keep GPU rendering for smoother background video playback.
+        // Forcing software render drops perceived FPS on many machines.
+        RenderOptions.ProcessRenderMode = RenderMode.Default;
 
         AddHelpMenuItem();
         WindowsManager.Instance.RegisterGlobalHotkey(_config, OnHotkeyHandler, null);
