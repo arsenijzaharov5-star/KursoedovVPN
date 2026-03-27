@@ -57,10 +57,34 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $api = Invoke-RestMethod -Uri "https://api.github.com/repos/SagerNet/sing-box/releases/latest"
-          $asset = $api.assets | Where-Object { $_.name -match 'windows-amd64' -and $_.name -match '\.zip$' } | Select-Object -First 1
-          if (-not $asset) { throw "sing-box windows-amd64 asset not found" }
-          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile "sing-box.zip"
-          Expand-Archive -Path "sing-box.zip" -DestinationPath "sing-box" -Force
+
+          $asset = $api.assets |
+            Where-Object {
+              $_.name -match 'windows-amd64' -and (
+                $_.name -match '\.zip$' -or $_.name -match '\.tar\.gz$' -or $_.name -match '\.tgz$'
+              )
+            } |
+            Select-Object -First 1
+
+          if (-not $asset) { throw "sing-box windows-amd64 archive asset not found" }
+
+          $assetName = $asset.name
+          $archivePath = "sing-box-archive"
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $archivePath
+
+          if (Test-Path "sing-box") { Remove-Item "sing-box" -Recurse -Force }
+          New-Item -ItemType Directory -Path "sing-box" | Out-Null
+
+          if ($assetName -match '\.zip$') {
+            Copy-Item $archivePath "sing-box.zip" -Force
+            Expand-Archive -Path "sing-box.zip" -DestinationPath "sing-box" -Force
+          } elseif ($assetName -match '\.tar\.gz$' -or $assetName -match '\.tgz$') {
+            Copy-Item $archivePath "sing-box.tar.gz" -Force
+            tar -xzf "sing-box.tar.gz" -C "sing-box"
+          } else {
+            throw "Unsupported sing-box archive format: $assetName"
+          }
+
           $exe = Get-ChildItem -Path "sing-box" -Recurse -Filter "sing-box.exe" | Select-Object -First 1
           if (-not $exe) { throw "sing-box.exe not found after extract" }
           Copy-Item $exe.FullName "sing-box.exe" -Force
