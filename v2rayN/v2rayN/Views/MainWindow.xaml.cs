@@ -1533,6 +1533,7 @@ public partial class MainWindow
 
             var tunnelHealthy = false;
             var coreRunningSeen = false;
+            var proxyReady = false;
             for (var i = 0; i < 5; i++)
             {
                 await Task.Delay(700);
@@ -1546,6 +1547,7 @@ public partial class MainWindow
                 tunnelHealthy = await IsTunnelHealthyAsync();
                 if (tunnelHealthy)
                 {
+                    proxyReady = true;
                     break;
                 }
             }
@@ -1557,6 +1559,7 @@ public partial class MainWindow
                 {
                     tunnelHealthy = true;
                     coreRunningSeen = true;
+                    proxyReady = true;
                 }
                 else if (TryStartXrayFallback())
                 {
@@ -1566,6 +1569,8 @@ public partial class MainWindow
                     {
                         tunnelHealthy = true;
                         coreRunningSeen = true;
+                        proxyReady = true;
+                        proxyReady = true;
                     }
                 }
 
@@ -1602,7 +1607,7 @@ public partial class MainWindow
                 }
             }
 
-            if (tunnelHealthy || coreRunningSeen)
+            if (tunnelHealthy || proxyReady)
             {
                 AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
                 SetConnectVisual(true);
@@ -1630,7 +1635,7 @@ public partial class MainWindow
                 await CoreManager.Instance.CoreStop();
                 AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedClear);
                 SetConnectVisual(false);
-                TrackMetric("connect_result", status: "fail", reason: "tunnel_not_up");
+                TrackMetric("connect_result", status: "fail", reason: "proxy_not_ready");
                 var diag = BuildConnectDiagnostics(coreRunningSeen, tunnelHealthy);
                 MessageBox.Show(
                     "Туннель не поднялся. Проверь ключ trojan://, SNI/порт, доступность сервера и наличие wintun.dll.\n\n" + diag,
