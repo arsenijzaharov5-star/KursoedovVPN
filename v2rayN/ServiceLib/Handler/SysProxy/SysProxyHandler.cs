@@ -15,7 +15,7 @@ public static class SysProxyHandler
 
         try
         {
-            var port = ResolveActiveProxyPort();
+            var port = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
             var exceptions = config.SystemProxyItem.SystemProxyExceptions.Replace(" ", "");
             if (port <= 0)
             {
@@ -64,55 +64,6 @@ public static class SysProxyHandler
             Logging.SaveLog(_tag, ex);
         }
         return true;
-    }
-
-    private static int ResolveActiveProxyPort()
-    {
-        // Keep compatibility with previous client behavior where local proxy commonly used 10808.
-        if (IsLocalPortListening(10808))
-        {
-            return 10808;
-        }
-
-        var candidates = new[]
-        {
-            AppManager.Instance.GetLocalPort(EInboundProtocol.mixed),
-            AppManager.Instance.GetLocalPort(EInboundProtocol.socks),
-            AppManager.Instance.GetLocalPort(EInboundProtocol.socks2),
-            AppManager.Instance.GetLocalPort(EInboundProtocol.socks3)
-        }
-        .Where(p => p > 0)
-        .Distinct()
-        .ToList();
-
-        if (candidates.Count == 0)
-        {
-            return 0;
-        }
-
-        foreach (var port in candidates)
-        {
-            if (IsLocalPortListening(port))
-            {
-                return port;
-            }
-        }
-
-        // Fallback to first configured candidate if runtime check cannot confirm listener yet.
-        return candidates[0];
-    }
-
-    private static bool IsLocalPortListening(int port)
-    {
-        try
-        {
-            var listeners = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners();
-            return listeners.Any(ep => ep.Port == port && (ep.Address.ToString() == "127.0.0.1" || ep.Address.Equals(System.Net.IPAddress.Loopback)));
-        }
-        catch
-        {
-            return false;
-        }
     }
 
     private static void GetWindowsProxyString(Config config, int port, out string strProxy, out string strExceptions)
