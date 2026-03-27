@@ -68,6 +68,12 @@ public static class SysProxyHandler
 
     private static int ResolveActiveProxyPort()
     {
+        // Keep compatibility with previous client behavior where local proxy commonly used 10808.
+        if (IsLocalPortListening(10808))
+        {
+            return 10808;
+        }
+
         var candidates = new[]
         {
             AppManager.Instance.GetLocalPort(EInboundProtocol.mixed),
