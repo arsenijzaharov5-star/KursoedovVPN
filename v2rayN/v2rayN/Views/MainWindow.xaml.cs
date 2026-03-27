@@ -6,6 +6,7 @@ using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using MaterialDesignThemes.Wpf;
 using ServiceLib.Handler;
+using ServiceLib.Handler.SysProxy;
 using ServiceLib.Events;
 using System.Diagnostics;
 using System.Net;
@@ -1327,6 +1328,8 @@ public partial class MainWindow
             SetMainConnectIcon(PackIconKind.Pause, animated: true);
             txtConnStatus.Text = "Подключено";
             txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2D323A"));
+            _config.SystemProxyItem.SysProxyType = ESysProxyType.ForcedChange;
+            _ = SysProxyHandler.UpdateSysProxy(_config, false);
             AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
             if (_connectedAt == null)
             {
@@ -1343,6 +1346,8 @@ public partial class MainWindow
             _liveSpeedText = "0 B/s / 0 B/s";
             txtConnStatus.Text = "Не подключено";
             txtConnStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B6B6B"));
+            _config.SystemProxyItem.SysProxyType = ESysProxyType.ForcedClear;
+            _ = SysProxyHandler.UpdateSysProxy(_config, false);
             AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedClear);
             _connectedAt = null;
             _connTimer.Stop();
