@@ -15,7 +15,9 @@ public static class SysProxyHandler
 
         try
         {
-            var port = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+            var httpPort = AppManager.Instance.GetLocalPort(EInboundProtocol.http);
+            var socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+            var port = httpPort > 0 ? httpPort : socksPort;
             var exceptions = config.SystemProxyItem.SystemProxyExceptions.Replace(" ", "");
             if (port <= 0)
             {
