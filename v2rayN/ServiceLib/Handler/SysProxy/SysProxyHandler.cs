@@ -15,9 +15,8 @@ public static class SysProxyHandler
 
         try
         {
-            var mixedPort = AppManager.Instance.GetLocalPort(EInboundProtocol.mixed);
-            var socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
-            var port = mixedPort > 0 ? mixedPort : socksPort;
+            // IMPORTANT: use base local proxy port (socks enum base) to avoid shifted mixed offset (e.g. 10814).
+            var port = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
             var exceptions = config.SystemProxyItem.SystemProxyExceptions.Replace(" ", "");
             if (port <= 0)
             {
