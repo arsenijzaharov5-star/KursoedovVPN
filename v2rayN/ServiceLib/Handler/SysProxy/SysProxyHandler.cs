@@ -15,7 +15,9 @@ public static class SysProxyHandler
 
         try
         {
-            var port = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+            var mixedPort = AppManager.Instance.GetLocalPort(EInboundProtocol.mixed);
+            var socksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+            var port = mixedPort > 0 ? mixedPort : socksPort;
             var exceptions = config.SystemProxyItem.SystemProxyExceptions.Replace(" ", "");
             if (port <= 0)
             {
@@ -77,7 +79,8 @@ public static class SysProxyHandler
         strProxy = string.Empty;
         if (config.SystemProxyItem.SystemProxyAdvancedProtocol.IsNullOrEmpty())
         {
-            strProxy = $"{Global.Loopback}:{port}";
+            // Force explicit HTTP/HTTPS system proxy format for Windows.
+            strProxy = $"http={Global.Loopback}:{port};https={Global.Loopback}:{port}";
         }
         else
         {
