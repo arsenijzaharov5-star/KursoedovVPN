@@ -78,8 +78,8 @@ public static class SysProxyHandler
         strProxy = string.Empty;
         if (config.SystemProxyItem.SystemProxyAdvancedProtocol.IsNullOrEmpty())
         {
-            // Force explicit HTTP/HTTPS system proxy format for Windows.
-            strProxy = $"http={Global.Loopback}:{port};https={Global.Loopback}:{port}";
+            // Keep classic Windows proxy format for best compatibility with Settings UI.
+            strProxy = $"{Global.Loopback}:{port}";
         }
         else
         {
