@@ -91,8 +91,11 @@ public static class ConfigHandler
         };
         config.TunModeItem ??= new TunModeItem
         {
-            EnableTun = false,
-            Mtu = 9000,
+            EnableTun = true,
+            Mtu = 1408,
+            AutoRoute = true,
+            StrictRoute = true,
+            EnableIPv6Address = false,
         };
         config.GuiItem ??= new();
         config.MsgUIItem ??= new();

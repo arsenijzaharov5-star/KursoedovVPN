@@ -52,9 +52,9 @@ public partial class CoreConfigSingboxService
 
             if (context.IsTunEnabled)
             {
-                if (_config.TunModeItem.Mtu <= 0)
+                if (_config.TunModeItem.Mtu <= 0 || _config.TunModeItem.Mtu > 2000)
                 {
-                    _config.TunModeItem.Mtu = Global.TunMtus.First();
+                    _config.TunModeItem.Mtu = 1408;
                 }
                 if (_config.TunModeItem.Stack.IsNullOrEmpty())
                 {

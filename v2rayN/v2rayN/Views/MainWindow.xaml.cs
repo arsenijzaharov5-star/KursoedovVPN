@@ -1612,28 +1612,24 @@ public partial class MainWindow
                 }
             }
 
-            if (tunnelHealthy || proxyReady)
+            if (tunnelHealthy)
             {
                 AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
                 SetConnectVisual(true);
-                TrackMetric("connect_result", status: "ok");
-
-                if (!hasWintun)
-                {
-                    MessageBox.Show(
-                        "wintun.dll не найден: включён режим системного прокси без TUN. На этом ПК это нормально, но часть приложений может не идти через VPN.",
-                        "kursoedovVPN",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
-                }
-                else if (!tunnelHealthy)
-                {
-                    MessageBox.Show(
-                        "Core запущен, но авто-проверка туннеля не подтвердила доступ к тестовым URL. Проверь IP вручную через 2ip.ru.",
-                        "kursoedovVPN",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
-                }
+                TrackMetric("connect_result", status: "ok", reason: "tun_ok");
+            }
+            else if (proxyReady)
+            {
+                AppEvents.SysProxyChangeRequested.Publish(ESysProxyType.ForcedChange);
+                SetConnectVisual(true);
+                TrackMetric("connect_result", status: "degraded", reason: "proxy_only");
+                MessageBox.Show(
+                    !hasWintun
+                        ? "Подключение работает только в режиме системного прокси: wintun.dll не найден, полноценный TUN/VPN не поднят. Браузер может работать, но часть приложений будет ходить мимо VPN."
+                        : "Полноценный TUN/VPN не поднялся, клиент работает только в режиме системного прокси. Это нестабильный режим для Windows-приложений. Проверь wintun.dll, настройки TUN и попробуй переподключиться.",
+                    "kursoedovVPN",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
             else
             {
