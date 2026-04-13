@@ -96,7 +96,7 @@ jobs:
         cp wintun-arm64.dll "$OutputPathArm64/bin/sing_box/wintun.dll"
   
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v7.0.0
+      uses: actions/upload-artifact@v7.0.1
       with:
         name: v2rayN-windows
         path: |
