@@ -37,7 +37,7 @@ jobs:
           dotnet publish "v2rayN/v2rayN/v2rayN.csproj" -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o "v2rayN/v2rayN/publish-win-x64"
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.22.x"
 
